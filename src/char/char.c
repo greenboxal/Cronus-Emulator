@@ -1643,11 +1643,11 @@ int mmo_char_tobuf(uint8* buffer, struct mmo_charstatus* p)
 	WBUFW(buf,106) = ( p->rename > 0 ) ? 0 : 1;
 	offset += 2;
 #endif
-#if (PACKETVER >= 20100720 && PACKETVER <= 20100727) || PACKETVER >= 20100803
+#if ((PACKETVER >= 20100720 && PACKETVER <= 20100727) || PACKETVER >= 20100803) && !defined(BRO_CLIENT)
 	mapindex_getmapname_ext(mapindex_id2name(p->last_point.map), (char*)WBUFP(buf,108));
 	offset += MAP_NAME_LENGTH_EXT;
 #endif
-#if PACKETVER >= 20100803
+#if PACKETVER >= 20100803 && !defined(BRO_CLIENT)
 	WBUFL(buf,124) = TOL(p->delete_date);
 	offset += 4;
 #endif
@@ -1655,7 +1655,7 @@ int mmo_char_tobuf(uint8* buffer, struct mmo_charstatus* p)
 	WBUFL(buf,128) = p->robe;
 	offset += 4;
 #endif
-#if PACKETVER != 20111116 //2011-11-16 wants 136, ask gravity.
+#if PACKETVER != 20111116 && !defined(BRO_CLIENT) //2011-11-16 wants 136, ask gravity.
 	#if PACKETVER >= 20110928
 		WBUFL(buf,132) = 0;  // change slot feature (0 = disabled, otherwise enabled)
 		offset += 4;
@@ -1682,7 +1682,11 @@ int mmo_char_send006b(int fd, struct char_session_data* sd)
 	if (save_log)
 		ShowInfo("Loading Char Data ("CL_BOLD"%d"CL_RESET")\n",sd->account_id);
 
+#ifndef BRO_CLIENT
 	j = 24 + offset; // offset
+#else
+	j = 4 + offset;
+#endif
 	WFIFOHEAD(fd,j + MAX_CHARS*MAX_CHAR_BUF);
 	WFIFOW(fd,0) = 0x6b;
 #if PACKETVER >= 20100413
@@ -1690,7 +1694,9 @@ int mmo_char_send006b(int fd, struct char_session_data* sd)
 	WFIFOB(fd,5) = MAX_CHARS; // Available slots.
 	WFIFOB(fd,6) = MAX_CHARS; // Premium slots.
 #endif
+#ifndef BRO_CLIENT
 	memset(WFIFOP(fd,4 + offset), 0, 20); // unknown bytes
+#endif
 	j+=mmo_chars_fromsql(sd, WFIFOP(fd,j));
 	WFIFOW(fd,2) = j; // packet len
 	WFIFOSET(fd,j);
@@ -1985,7 +1991,7 @@ int parse_fromlogin(int fd)
 				} else {
 					// send characters to player
 					mmo_char_send006b(i, sd);
-#if PACKETVER >=  20110309
+#if PACKETVER >=  20110309 && !defined(BRO_CLIENT)
 					// PIN code system, disabled
 					WFIFOHEAD(i, 12);
 					WFIFOW(i, 0) = 0x08B9;

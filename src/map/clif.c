@@ -14040,7 +14040,7 @@ void clif_parse_Auction_buysell(int fd, struct map_session_data* sd)
 void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 {
 	int fd,i;
-#if PACKETVER < 20070711
+#if PACKETVER < 20070711 || defined(BRO_CLIENT)
 	const int offset = 8;
 #else
 	const int offset = 12;
@@ -14055,7 +14055,7 @@ void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 	WFIFOW(fd,0) = 0x287;
 	WFIFOW(fd,2) = offset+nd->u.shop.count*11;
 	WFIFOL(fd,4) = sd->cashPoints; // Cash Points
-#if PACKETVER >= 20070711
+#if PACKETVER >= 20070711 && !defined(BRO_CLIENT)
 	WFIFOL(fd,8) = sd->kafraPoints; // Kafra Points
 #endif
 
@@ -14091,7 +14091,7 @@ void clif_cashshop_ack(struct map_session_data* sd, int error)
 	WFIFOHEAD(fd, packet_len(0x289));
 	WFIFOW(fd,0) = 0x289;
 	WFIFOL(fd,2) = sd->cashPoints;
-#if PACKETVER < 20070711
+#if PACKETVER < 20070711 || defined (BRO_CLIENT)
 	WFIFOW(fd,6) = TOW(error);
 #else
 	WFIFOL(fd,6) = sd->kafraPoints;
@@ -14114,10 +14114,14 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
         fail = 1;
     else
     {
-#if PACKETVER < 20101116
+#if PACKETVER < 20101116 || defined(BRO_CLIENT)
         short nameid = RFIFOW(fd,2);
         short amount = RFIFOW(fd,4);
-        int points = RFIFOL(fd,6);
+#if PACKETVER >= 20070711 && !defined(BRO_CLIENT)
+		int points = RFIFOL(fd,6); // Not Implemented. Should be 0
+#else
+		int points = 0;
+#endif
 
         fail = npc_cashshop_buy(sd, nameid, amount, points);
 #else
@@ -16084,7 +16088,7 @@ static int packetdb_readdb(void)
 	    6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	    0,  0,  0,  0,  8,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	//#0x0280
-#if PACKETVER < 20070711
+#if PACKETVER < 20070711 || defined(BROEXE)
 	    0,  0,  0,  6, 14,  0,  0, -1,  6,  8, 18,  0,  0,  0,  0,  0,
 #else
 	    0,  0,  0,  6, 14,  0,  0, -1, 10, 12, 18,  0,  0,  0,  0,  0, // 0x288, 0x289 increase by 4 (kafra points)
