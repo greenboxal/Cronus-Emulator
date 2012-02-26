@@ -1,0 +1,36 @@
+#!/bin/bash
+# modified by shazeya@syafi.com (NL130240)
+# traduzido por GreenBox
+
+./cronus-start start
+sleep 30
+
+while [ true ]; do
+    if [ "      0" = "$(ps | grep -e log | wc -l)" ] ||
+#    if [ "      0" = "$(ps | grep -e login | wc -l)" ] ||
+       [ "      0" = "$(ps | grep -e char  | wc -l)" ] ||
+       [ "      0" = "$(ps | grep -e map   | wc -l)" ]; then
+        printf "Erro:"
+        date
+        sleep 10
+        printf "Verificando:"
+        date
+        if [ "      0" = "$(ps | grep -e log | wc -l)" ] ||
+#        if [ "      0" = "$(ps | grep -e login | wc -l)" ] ||
+           [ "      0" = "$(ps | grep -e char  | wc -l)" ] ||
+           [ "      0" = "$(ps | grep -e map   | wc -l)" ]; then
+            printf "Confirmação de erro:"
+            date
+            printf "Restauração:"
+            date
+            ./athena-start start
+        else
+            printf "Check Miss Sorry:"
+            date
+        fi
+#    else
+#        printf "Check OK:"
+#        date
+    fi
+    sleep 10
+done
