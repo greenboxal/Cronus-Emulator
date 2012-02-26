@@ -48,7 +48,7 @@
 //#define BRO_CLIENT
 
 #ifndef PACKETVER
-	#define PACKETVER 20111116
+	#define PACKETVER 20111102
 	//#define PACKETVER	20100730
 #endif
 

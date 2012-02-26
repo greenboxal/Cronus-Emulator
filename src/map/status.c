@@ -36,7 +36,9 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
+#include <math.h>
 
+#define ASPD_FORMULA 0
 
 //Regen related flags.
 enum e_regen
@@ -50,20 +52,19 @@ enum e_regen
 static int max_weight_base[CLASS_COUNT];
 static int hp_coefficient[CLASS_COUNT];
 static int hp_coefficient2[CLASS_COUNT];
+static int hp_coefficient3[CLASS_COUNT];
+static int hp_coefficient4[CLASS_COUNT];
+static int hp_coefficient5[CLASS_COUNT];
 static int hp_sigma_val[CLASS_COUNT][MAX_LEVEL+1];
 static int sp_coefficient[CLASS_COUNT];
+static int sp_coefficient2[CLASS_COUNT];
+static int shield_penalty[CLASS_COUNT];
 static int aspd_base[CLASS_COUNT][MAX_WEAPON_TYPE];	//[blackhole89]
 static int refinebonus[MAX_REFINE_BONUS][3];	// ¸˜Bƒ{[ƒiƒXƒe[ƒuƒ‹(refine_db.txt)
 int percentrefinery[5][MAX_REFINE+1];	// ¸˜B¬Œ÷—¦(refine_db.txt)
 static int atkmods[3][MAX_WEAPON_TYPE];	// •ŠíATKƒTƒCƒYC³(size_fix.txt)
 static char job_bonus[CLASS_COUNT][MAX_LEVEL];
-#if REMODE
-enum {
-	SHIELD_ASPD,
-	RE_JOB_DB_MAX,
-} RE_JOB_DB;
-static int re_job_db[CLASS_COUNT][RE_JOB_DB_MAX];//[RRInd]
-#endif
+
 static struct eri *sc_data_ers; //For sc_data entries
 static struct status_data dummy_status;
 
@@ -1577,7 +1578,8 @@ int status_check_visibility(struct block_list *src, struct block_list *target)
 int status_base_amotion_pc(struct map_session_data* sd, struct status_data* status)
 {
 	int amotion;
-	
+
+#ifndef REMODE
 	// base weapon delay
 	amotion = (sd->status.weapon < MAX_WEAPON_TYPE)
 	 ? (aspd_base[pc_class2idx(sd->status.class_)][sd->status.weapon]) // single weapon
@@ -1588,12 +1590,56 @@ int status_base_amotion_pc(struct map_session_data* sd, struct status_data* stat
 	
 	// raw delay adjustment from bAspd bonus
 	amotion+= sd->aspd_add;
-#if REMODE
+#else REMODE
+	// base weapon delay
+	if (sd->status.weapon < MAX_WEAPON_TYPE)
+	{
+		amotion = aspd_base[pc_class2idx(sd->status.class_)][sd->status.weapon];
+	}
+	else
+	{
+		amotion = aspd_base[pc_class2idx(sd->status.class_)][sd->weapontype1];
+
+		switch (sd->weapontype2)
+		{
+		case W_DAGGER: 
+			amotion += 100; 
+			break;
+
+		case W_1HAXE: 
+			amotion += ((sd->status.class_ == 4065) ? 200 : 120); 
+			break;
+
+		case W_1HSWORD: 
+			amotion += ((sd->status.class_ == 4065) ? 160 : 120); 
+			break;
+		}
+	}
+
+	// percentual delay reduction from stats 
+#if ASPD_FORMULA == 1
+	amotion-= amotion * (4*status->agi + status->dex)/1000;
+#elif ASPD_FORMULA == 2
+	amotion = (2000 - amotion)/10; 
+	amotion += sqrt((status->agi*status->agi)/2 + (status->dex*status->dex)/5)/4; 
+	amotion = 2000 - (amotion * 10); 
+#else
+	amotion = (2000 - amotion)/10; 
+	amotion += (int)((sqrt((status->agi*9.9987f) + (status->dex*0.1922f)) * ((amotion>145) ? (1-(amotion-144)/50.0f) : 0.96f)) - ((status->agi < 205) ? ((sqrt(205) - sqrt(status->agi))/7.15f) : 0)); 
+	amotion = 2000 - (amotion * 10); 
+#endif
+
+	// raw delay adjustment from bAspd bonus
+	amotion += sd->aspd_add;
+
 	/**
 	 * Bearing a shield decreases your ASPD by a fixed value depending on your class
 	 **/
-	if( sd->status.shield )
-		amotion += re_job_db[pc_class2idx(sd->status.class_)][SHIELD_ASPD];
+	// shield penalty [Vianna] 
+	if (battle_config.shield_penalty_rate > 0 && 
+		sd->status.shield) // apenas quando estiver com escudo equipado [ItachiSan] 
+		amotion += shield_penalty[pc_class2idx(sd->status.class_)] * battle_config.shield_penalty_rate / 100; 
+	
 	/**
 	 * RE Absolute aspd modifiers
 	 **/
@@ -1608,6 +1654,7 @@ int status_base_amotion_pc(struct map_session_data* sd, struct status_data* stat
 			amotion -= 70;
 	}
 #endif
+
  	return amotion;
 }
 
@@ -1971,23 +2018,48 @@ int status_calc_pet_(struct pet_data *pd, bool first)
 /// Helper function for status_base_pc_maxhp(), used to pre-calculate the hp_sigma_val[] array
 static void status_calc_sigma(void)
 {
-	int i,j;
+	int i, j;
+	float seqIni, incMul, baseHP, jobHP;
 
-	for(i = 0; i < CLASS_COUNT; i++)
+	for( i = 0; i < CLASS_COUNT; i++ )
 	{
 		unsigned int k = 0;
-		hp_sigma_val[i][0] = hp_sigma_val[i][1] = 0;
-		for(j = 2; j <= MAX_LEVEL; j++)
+
+		if(!hp_coefficient4[i])
 		{
-			k += (hp_coefficient[i]*j + 50) / 100;
-			hp_sigma_val[i][j] = k;
-			if (k >= INT_MAX)
-				break; //Overflow protection. [Skotlex]
+			hp_sigma_val[i][0] = hp_sigma_val[i][1] = 0;
+			for( j = 2; j <= MAX_LEVEL; j++ )
+			{
+				k += (hp_coefficient[i] * j + 50) / 100;
+				hp_sigma_val[i][j] = k;
+				if( k >= INT_MAX )
+					break; //Overflow protection. [Skotlex]
+			}
+			for(; j <= MAX_LEVEL; j++)
+				hp_sigma_val[i][j] = INT_MAX;
 		}
-		for(; j <= MAX_LEVEL; j++)
-			hp_sigma_val[i][j] = INT_MAX;
+		else
+		{
+			// HP das 3rd ~ [ItachiSan]
+			seqIni = hp_coefficient5[i]/1000.0f;
+			incMul = hp_coefficient2[i]/1000.0f;
+			baseHP = (float)hp_coefficient4[i];
+			jobHP  = (float)hp_coefficient[i];
+
+			if (MAX_LEVEL >= 99)
+				hp_sigma_val[i][99]  = hp_coefficient3[i];
+			if (MAX_LEVEL >  99)
+				hp_sigma_val[i][100] = (int)baseHP;
+
+			for( j = 101; j <= MAX_LEVEL; j++ )
+			{
+				baseHP += jobHP + (int)(seqIni + (j - 101) * incMul);
+				hp_sigma_val[i][j] = (int)baseHP;
+			}
+		}
 	}
 }
+
 
 /// Calculates base MaxHP value according to class and base level
 /// The recursive equation used to calculate level bonus is (using integer operations)
@@ -1997,7 +2069,12 @@ static void status_calc_sigma(void)
 static unsigned int status_base_pc_maxhp(struct map_session_data* sd, struct status_data* status)
 {
 	unsigned int val = pc_class2idx(sd->status.class_);
-	val = 35 + sd->status.base_level*hp_coefficient2[val]/100 + hp_sigma_val[val][sd->status.base_level];
+	float classModifier = 1;
+
+	if (!hp_coefficient4[val]) // Suporte ao HP das 3rd ~ [ItachiSan]
+		val = 35 + sd->status.base_level*hp_coefficient2[val]/100 + hp_sigma_val[val][sd->status.base_level];
+	else
+		val = hp_sigma_val[val][sd->status.base_level];
 
 	if((sd->class_&MAPID_UPPERMASK) == MAPID_NINJA || (sd->class_&MAPID_UPPERMASK) == MAPID_GUNSLINGER)
 		val += 100; //Since their HP can't be approximated well enough without this.
@@ -2006,28 +2083,43 @@ static unsigned int status_base_pc_maxhp(struct map_session_data* sd, struct sta
 	if((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && sd->status.base_level >= 99)
 		val += 2000; //Supernovice lvl99 hp bonus.
 
-	val += val * status->vit/100; // +1% per each point of VIT
+	/* Fix definitivo do HP - pequena variacao de 1 ponto pra mais ou pra menos corrigida.
+	   A fórmula correta é MAX_HP = floor(floor(MAX_HP * TRANS_MODE) * (1 + VIT * 0.01)) ~ [ItachiSan] */
 
 	if (sd->class_&JOBL_UPPER)
-		val += val * 25/100; //Trans classes get a 25% hp bonus
+		classModifier = 1.25f; // acrescenta 25% dos transclasse
 	else if (sd->class_&JOBL_BABY)
-		val -= val * 30/100; //Baby classes get a 30% hp penalty
+		classModifier = 0.70f; // diminui 30% das classes baby
+
+	val = (unsigned int)floor(floor(val * classModifier) * (1 + status->vit * 0.01)); // fix na fórmula do HP ~ [ItachiSan]
+
 	return val;
 }
 
 static unsigned int status_base_pc_maxsp(struct map_session_data* sd, struct status_data *status)
 {
-	unsigned int val;
+	unsigned int val = pc_class2idx(sd->status.class_);
+	float classModifier = 1;
 
-	val = 10 + sd->status.base_level*sp_coefficient[pc_class2idx(sd->status.class_)]/100;
-	val += val * status->int_/100;
+	// suporte ao SP das 3rd ~ [ItachiSan]
+	if (!sp_coefficient2[val])
+		val = 10 + sd->status.base_level*sp_coefficient[val]/100;
+	else if (sd->status.base_level == 99)
+		val = sp_coefficient[val] * 100;
+	else
+		val = sp_coefficient2[val] + (sd->status.base_level - 100) * sp_coefficient[val];
 
 	if (sd->class_&JOBL_UPPER)
-		val += val * 25/100;
+		classModifier = 1.25f;
 	else if (sd->class_&JOBL_BABY)
-		val -= val * 30/100;
+		classModifier = 0.70f;
 	if ((sd->class_&MAPID_UPPERMASK) == MAPID_TAEKWON && sd->status.base_level >= 90 && pc_famerank(sd->status.char_id, MAPID_TAEKWON))
-		val *= 3; //Triple max SP for top ranking Taekwons over level 90.
+		classModifier = 3.00f; // triplo sp do ranking taekown
+
+	/* Fix definitivo do SP - pequena variacao de 1 ponto pra mais ou pra menos corrigida.
+	   A fórmula correta é MAX_SP = floor(floor(MAX_SP * TRANS_MODE) * (1 + INT * 0.01)) ~ [ItachiSan] */
+
+	val = (unsigned int)floor(floor(val * classModifier) * (1 + status->int_ * 0.01)); // fix na fórmula do SP ~ [ItachiSan]
 
 	return val;
 }
@@ -9965,25 +10057,6 @@ static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_
  * size_fix.txt   - size adjustment table for weapons
  * refine_db.txt  - refining data table
  *------------------------------------------*/
-#if REMODE
-static bool status_readdb_job_re(char* fields[], int columns, int current) {
-	int idx, class_;
-	unsigned int i;
-
-	class_ = atoi(fields[0]);
-
-	if(!pcdb_checkid(class_)) {
-		ShowWarning("status_readdb_job_re: Invalid job class %d specified.\n", class_);
-		return false;
-	}
-	idx = pc_class2idx(class_);
-
-	for(i = 0; i < RE_JOB_DB_MAX; i++) {
-		re_job_db[idx][i] = atoi(fields[i+1]);
-	}
-	return true;
-}
-#endif
 static bool status_readdb_job1(char* fields[], int columns, int current)
 {// Job-specific values (weight, HP, SP, ASPD)
 	int idx, class_;
@@ -10001,11 +10074,16 @@ static bool status_readdb_job1(char* fields[], int columns, int current)
 	max_weight_base[idx] = atoi(fields[1]);
 	hp_coefficient[idx]  = atoi(fields[2]);
 	hp_coefficient2[idx] = atoi(fields[3]);
-	sp_coefficient[idx]  = atoi(fields[4]);
+	hp_coefficient3[idx] = atoi(fields[4]);
+	hp_coefficient4[idx] = atoi(fields[5]);
+	hp_coefficient5[idx] = atoi(fields[6]);
+	sp_coefficient[idx]  = atoi(fields[7]);
+	sp_coefficient2[idx] = atoi(fields[8]);
+	shield_penalty[idx]  = atoi(fields[9]);
 
 	for(i = 0; i < MAX_WEAPON_TYPE; i++)
 	{
-		aspd_base[idx][i] = atoi(fields[i+5]);
+		aspd_base[idx][i] = atoi(fields[i+10]);
 	}
 	return true;
 }
@@ -10067,11 +10145,12 @@ int status_readdb(void)
 	memset(max_weight_base, 0, sizeof(max_weight_base));
 	memset(hp_coefficient, 0, sizeof(hp_coefficient));
 	memset(hp_coefficient2, 0, sizeof(hp_coefficient2));
+	memset(hp_coefficient3, 0, sizeof(hp_coefficient3));
+	memset(hp_coefficient4, 0, sizeof(hp_coefficient4));
+	memset(hp_coefficient5, 0, sizeof(hp_coefficient5));
 	memset(sp_coefficient, 0, sizeof(sp_coefficient));
 	memset(aspd_base, 0, sizeof(aspd_base));
-#if REMODE
-	memset(re_job_db, 0, sizeof(re_job_db));
-#endif
+
 	// job_db2.txt
 	memset(job_bonus,0,sizeof(job_bonus)); // Job-specific stats bonus
 
@@ -10093,12 +10172,11 @@ int status_readdb(void)
 	// read databases
 	//
 
-	sv_readdb(db_path, "job_db1.txt",   ',', 5+MAX_WEAPON_TYPE, 5+MAX_WEAPON_TYPE, -1,                            &status_readdb_job1);
+	sv_readdb(db_path, "job_db1.txt",   ',', 10+MAX_WEAPON_TYPE, 10+MAX_WEAPON_TYPE, -1,                            &status_readdb_job1);
 	sv_readdb(db_path, "job_db2.txt",   ',', 1,                 1+MAX_LEVEL,       -1,                            &status_readdb_job2);
 	sv_readdb(db_path, "size_fix.txt",  ',', MAX_WEAPON_TYPE,   MAX_WEAPON_TYPE,    ARRAYLENGTH(atkmods),         &status_readdb_sizefix);
 #if REMODE
 	sv_readdb(db_path, "re/refine_db.txt", ',', 3+MAX_REFINE+1,    3+MAX_REFINE+1,     ARRAYLENGTH(percentrefinery), &status_readdb_refine);
-	sv_readdb(db_path, "re/job_db_extra.txt",  ',', 1+RE_JOB_DB_MAX, 1+RE_JOB_DB_MAX,        -1,                   &status_readdb_job_re);
 #else
 	sv_readdb(db_path, "pre-re/refine_db.txt", ',', 3+MAX_REFINE+1,    3+MAX_REFINE+1,     ARRAYLENGTH(percentrefinery), &status_readdb_refine);
 #endif
