@@ -4945,6 +4945,9 @@ static const struct _battle_data {
 	{ "max_third_parameter",                &battle_config.max_third_parameter,             20,     0,      INT_MAX,        },
 	{ "atcommand_max_stat_bypass",          &battle_config.atcommand_max_stat_bypass,       0,      0,      100,            },          
 	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          90,     0,      100				},
+	
+	// Cronus
+	{ "shield_penalty_rate",                &battle_config.shield_penalty_rate,             100,     0,      1000			},
 };
 
 

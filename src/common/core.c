@@ -151,7 +151,7 @@ void usercheck(void)
 {
 #ifndef _WIN32
     if (geteuid() == 0) {
-		ShowWarning ("You are running rAthena with root privileges, it is not necessary.\n");
+		ShowWarning ("Você está rodando o Cronus como root, alem de desnecessário isto é inseguro.\n");
     }
 #endif
 }
