@@ -1,2 +1,2 @@
-// Internal default is limited to 128 lines.  If you need more, you will need to modify the MOTD_LINE_SIZE definition in pc.c
-Bem vindo ao Cronus! Reporte os bugs no forum.
+//O limite de linhas é 128. Caso necessite de mais, modifique a linha MOTD_LINE_SIZE em pc.c
+Seja bem-vindo(a) ao Cronus Renovare [Renewal] ! Divirta-se! Por favor reporte qualquer bug/erro que você encontrar em nosso site: www.cronus-emulator.com
