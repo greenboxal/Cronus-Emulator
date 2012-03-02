@@ -1,18 +1,32 @@
-// <Skill id>,<Cast>,<Delay (optional)>
+//--------------------------------------------------------------
+// _________                                    
+// \_   ___ \_______  ____   ____  __ __  ______
+// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
+// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
+//  \______  /|__|   \____/|___|  /____//____  >
+//         \/                   \/           \/  
+//--------------------------------------------------------------
+// Banco de Dados de Influências Externas na Conjuração e Delay das Habilidades
+//--------------------------------------------------------------
+// Estrutura do banco de dados:
+// SkillID,Cast,Delay (optional)
 //
-// Cast:  0 - everything affects the skill's cast time
-//        1 - skill's cast time is not affected by dex
-//        2 - skill's cast time is not affected by statuses (Suffragium, etc)
-//        4 - skill's cast time is not affected by item bonuses (equip, cards)
+// 01. SkillID		ID da habilidade.
+// 02. Cast
+//	0 - qualquer coisa afeta o tempo de conjuração da habilidade
+//	1 - a conjuração não é afetada por destreza
+//	2 - a conjuração não é afetada por magias/bragi
+//	4 - a conjuração não é afetada por bônus de itens/cartas/equip.
 //
-// Delay: 0 - everything affects the skill's delay
-//        1 - skill's delay is not affected by dex
-//        2 - skill's delay is not affected by Magic Strings / Bragi
-//        4 - skill's delay is not affected by item bonuses (equip, cards)
+// 03. Delay
+//	0 - qualquer coisa afeta o delay da habilidade
+//	1 - o delay da habilidade não é afetado por destreza
+//	2 - o delay da habilidade não é afetado por magias/bragi
+//	4 - o delay da habilidade não é afetado por bônus de itens/cartas/equip.
 //
-// Note: Values are bit fields, add them up to combine their effects.
-// Note: Delay setting '1' only makes sense when delay_dependon_dex is enabled.
-// Example: 46,1,1 = Double Strafe's cast time and delay is not affected by dex.
+// NOTA: Os valores são em bit, some para combinar diferentes efeitos.
+// NOTA: Configurando o Delay para '1' só fara sentido se delay_dependon_dex estiver habilitado.
+//--------------------------------------------------------------
 
 136,0,2	//AS_SONICBLOW
 263,0,2	//MO_TRIPLEATTACK
@@ -24,6 +38,7 @@
 371,0,2	//CH_TIGERFIST
 372,0,2	//CH_CHAINCRUSH
 394,0,2	//CG_ARROWVULCAN
+401,1	// CH_SOULCOLLECT
 403,3	//PF_MEMORIZE
 408,1	//WE_BABY
 409,1	//WE_CALLPARENT
@@ -33,11 +48,31 @@
 496,1	//AM_TWILIGHT1
 497,1	//AM_TWILIGHT2
 498,1	//AM_TWILIGHT3
+//576,1	//AM_TWILIGHT4
 512,3	//GS_TRACKING
 1014,1	//PR_REDEMPTIO
-2534,7,7	//RETURN_TO_ELDICASTES
-2536,7,7	//ALL_GUARDIAN_RECALL
-//2537,0,7	//ALL_ODINS_POWER
+
+2012,1	//RK_CRUSHSTRIKE
+2013,1	//RK_REFRESH
+2014,1	//RK_GIANTGROWTH
+2015,1	//RK_STONEHARDSKIN
+2032,1	//GC_POISONSMOKE
+2205,1	//WL_MARSHOFABYSS
+2206,1	//WL_RECOGNIZEDSPELL
+2234,1	//RA_FEARBREEZE
+2267,1	//NC_SELFDESTRUCTION
+2268,1	//NC_SHAPESHIFT
+2270,1	//NC_INFRAREDSCAN
+2271,1	//NC_ANALYZE
+2281,1	//NC_SILVERSNIPER
+2282,1	//NC_MAGICDECOY
+2313,1	//LG_FORCEOFVANGUARD
+2462,1	//SO_EL_ANALYSIS
+
+2533,7	//ALL_ODINS_RECALL
+2534,1	//RETURN_TO_ELDICASTES
+2536,1	//ALL_GUARDIAN_RECALL
+
 10010,3	//GD_BATTLEORDER
 10011,3	//GD_REGENERATION
 10012,6	//GD_RESTORE
