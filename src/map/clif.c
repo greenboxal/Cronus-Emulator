@@ -11122,6 +11122,28 @@ void clif_parse_StoragePassword(int fd, struct map_session_data *sd)
 	char *password = (char *)RFIFOP(fd, 4);
 	char *newpassword = (char *)RFIFOP(fd, 20);
 
+	char str[32] = { 0 };
+	u4byte tmp[4] = { 0 };
+
+	memset(str, 0, sizeof(str));
+	memset(tmp, 0, sizeof(tmp));
+
+#ifdef STORAGE_PASSWORD_KEY
+	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 4), (u4byte *)&tmp);
+#endif
+
+	sprintf(str, "%d", tmp[0]);
+	memcpy(RBUFP(fd, 4), &str[1], 8);
+	RBUFB(fd, 12) = 0;
+	
+#ifdef STORAGE_PASSWORD_KEY
+	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 20), (u4byte *)&tmp);
+#endif
+			
+	sprintf(str, "%d", tmp[0]);
+	memcpy(RBUFP(fd, 20), &str[1], 8);
+	RBUFB(fd, 28) = 0;
+
 	if (type == 3 && sd->state.storage_open_progress == 1)
 	{
 		int realpw = pc_readaccountreg(sd, "#STORAGEPASSWORD");
