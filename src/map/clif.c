@@ -51,10 +51,11 @@
 //#define DUMP_INVALID_PACKET
 
 struct Clif_Config {
-	int packet_db_ver;	//Preferred packet version.
-	int connect_cmd[MAX_PACKET_VER + 1]; //Store the connect command for all versions. [Skotlex]
+	int connect_cmd; // Store the connect command. [GreenBox]
 } clif_config;
 
+// 0: server
+// 1: client
 struct s_packet_db packet_db[MAX_PACKET_VER + 1][MAX_PACKET_DB + 1];
 
 //Converts item type in case of pet eggs.
@@ -62,7 +63,6 @@ static inline int itemtype(int type)
 {
 	return ( type == IT_PETEGG ) ? IT_WEAPON : type;
 }
-
 
 static inline void WBUFPOS(uint8* p, unsigned short pos, short x, short y, unsigned char dir)
 {
@@ -341,7 +341,7 @@ static int clif_send_sub(struct block_list *bl, va_list ap)
 		return 0;
 	}
 
-	if (packet_db[sd->packet_ver][RBUFW(buf,0)].len) { // packet must exist for the client version
+	if (packet_db[1][RBUFW(buf,0)].len) { // packet must exist for the client version
 		memcpy(WFIFOP(fd,0), buf, len);
 		WFIFOSET(fd,len);
 	}
@@ -374,7 +374,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 		iter = mapit_getallusers();
 		while( (tsd = (TBL_PC*)mapit_next(iter)) != NULL )
 		{
-			if( packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+			if( packet_db[1][RBUFW(buf,0)].len )
 			{ // packet must exist for the client version
 				WFIFOHEAD(tsd->fd, len);
 				memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -388,7 +388,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 		iter = mapit_getallusers();
 		while( (tsd = (TBL_PC*)mapit_next(iter)) != NULL )
 		{
-			if( bl->m == tsd->bl.m && packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+			if( bl->m == tsd->bl.m && packet_db[1][RBUFW(buf,0)].len )
 			{ // packet must exist for the client version
 				WFIFOHEAD(tsd->fd, len);
 				memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -426,7 +426,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 			for(i = 0; i < cd->users; i++) {
 				if (type == CHAT_WOS && cd->usersd[i] == sd)
 					continue;
-				if (packet_db[cd->usersd[i]->packet_ver][RBUFW(buf,0)].len) { // packet must exist for the client version
+				if (packet_db[1][RBUFW(buf,0)].len) { // packet must exist for the client version
 					if ((fd=cd->usersd[i]->fd) >0 && session[fd]) // Added check to see if session exists [PoW]
 					{
 						WFIFOHEAD(fd,len);
@@ -442,7 +442,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 		iter = mapit_getallusers();
 		while( (tsd = (TBL_PC*)mapit_next(iter)) != NULL )
 		{
-			if( tsd->state.mainchat && tsd->chatID == 0 && packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+			if( tsd->state.mainchat && tsd->chatID == 0 && packet_db[1][RBUFW(buf,0)].len )
 			{ // packet must exist for the client version
 				WFIFOHEAD(tsd->fd, len);
 				memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -482,7 +482,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 				if( (type == PARTY_AREA || type == PARTY_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1) )
 					continue;
 				
-				if( packet_db[sd->packet_ver][RBUFW(buf,0)].len )
+				if( packet_db[1][RBUFW(buf,0)].len )
 				{ // packet must exist for the client version
 					WFIFOHEAD(fd,len);
 					memcpy(WFIFOP(fd,0), buf, len);
@@ -495,7 +495,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 			iter = mapit_getallusers();
 			while( (tsd = (TBL_PC*)mapit_next(iter)) != NULL )
 			{
-				if( tsd->partyspy == p->party.party_id && packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+				if( tsd->partyspy == p->party.party_id && packet_db[1][RBUFW(buf,0)].len )
 				{ // packet must exist for the client version
 					WFIFOHEAD(tsd->fd, len);
 					memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -515,7 +515,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 		{
 			if( type == DUEL_WOS && bl->id == tsd->bl.id )
 				continue;
-			if( sd->duel_group == tsd->duel_group && packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+			if( sd->duel_group == tsd->duel_group && packet_db[1][RBUFW(buf,0)].len )
 			{ // packet must exist for the client version
 				WFIFOHEAD(tsd->fd, len);
 				memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -526,7 +526,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 		break;
 
 	case SELF:
-		if (sd && (fd=sd->fd) && packet_db[sd->packet_ver][RBUFW(buf,0)].len) { // packet must exist for the client version
+		if (sd && (fd=sd->fd) && packet_db[1][RBUFW(buf,0)].len) { // packet must exist for the client version
 			WFIFOHEAD(fd,len);
 			memcpy(WFIFOP(fd,0), buf, len);
 			WFIFOSET(fd,len);
@@ -567,7 +567,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 					if( (type == GUILD_AREA || type == GUILD_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1) )
 						continue;
 
-					if( packet_db[sd->packet_ver][RBUFW(buf,0)].len )
+					if( packet_db[1][RBUFW(buf,0)].len )
 					{ // packet must exist for the client version
 						WFIFOHEAD(fd,len);
 						memcpy(WFIFOP(fd,0), buf, len);
@@ -581,7 +581,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 			iter = mapit_getallusers();
 			while( (tsd = (TBL_PC*)mapit_next(iter)) != NULL )
 			{
-				if( tsd->guildspy == g->guild_id && packet_db[tsd->packet_ver][RBUFW(buf,0)].len )
+				if( tsd->guildspy == g->guild_id && packet_db[1][RBUFW(buf,0)].len )
 				{ // packet must exist for the client version
 					WFIFOHEAD(tsd->fd, len);
 					memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -614,7 +614,7 @@ int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target
 					continue;
 				if( (type == BG_AREA || type == BG_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1) )
 					continue;
-				if( packet_db[sd->packet_ver][RBUFW(buf,0)].len )
+				if( packet_db[1][RBUFW(buf,0)].len )
 				{ // packet must exist for the client version
 					WFIFOHEAD(fd,len);
 					memcpy(WFIFOP(fd,0), buf, len);
@@ -8788,81 +8788,6 @@ static bool clif_process_message(struct map_session_data* sd, int format, char**
 	return true;
 }
 
-// ---------------------
-// clif_guess_PacketVer
-// ---------------------
-// Parses a WantToConnection packet to try to identify which is the packet version used. [Skotlex]
-// error codes:
-// 0 - Success
-// 1 - Unknown packet_ver
-// 2 - Invalid account_id
-// 3 - Invalid char_id
-// 4 - Invalid login_id1 (reserved)
-// 5 - Invalid client_tick (reserved)
-// 6 - Invalid sex
-// Only the first 'invalid' error that appears is used.
-static int clif_guess_PacketVer(int fd, int get_previous, int *error)
-{
-	static int err = 1;
-	static int packet_ver = -1;
-	int cmd, packet_len, value; //Value is used to temporarily store account/char_id/sex
-
-	if (get_previous)
-	{//For quick reruns, since the normal code flow is to fetch this once to identify the packet version, then again in the wanttoconnect function. [Skotlex]
-		if( error )
-			*error = err;
-		return packet_ver;
-	}
-
-	//By default, start searching on the default one.
-	err = 1;
-	packet_ver = clif_config.packet_db_ver;
-	cmd = RFIFOW(fd,0);
-	packet_len = RFIFOREST(fd);
-
-#define SET_ERROR(n) \
-	if( err == 1 )\
-		err = n;\
-//define SET_ERROR
-
-	// FIXME: If the packet is not received at once, this will FAIL.
-	// Figure out, when it happens, that only part of the packet is
-	// received, or fix the function to be able to deal with that
-	// case.
-#define CHECK_PACKET_VER() \
-	if( cmd != clif_config.connect_cmd[packet_ver] || packet_len != packet_db[packet_ver][cmd].len )\
-		;/* not wanttoconnection or wrong length */\
-	else if( (value=(int)RFIFOL(fd, packet_db[packet_ver][cmd].pos[0])) < START_ACCOUNT_NUM || value > END_ACCOUNT_NUM )\
-	{ SET_ERROR(2); }/* invalid account_id */\
-	else if( (value=(int)RFIFOL(fd, packet_db[packet_ver][cmd].pos[1])) <= 0 )\
-	{ SET_ERROR(3); }/* invalid char_id */\
-	/*                   RFIFOL(fd, packet_db[packet_ver][cmd].pos[2]) - don't care about login_id1 */\
-	/*                   RFIFOL(fd, packet_db[packet_ver][cmd].pos[3]) - don't care about client_tick */\
-	else if( (value=(int)RFIFOB(fd, packet_db[packet_ver][cmd].pos[4])) != 0 && value != 1 )\
-	{ SET_ERROR(6); }/* invalid sex */\
-	else\
-	{\
-		err = 0;\
-		if( error )\
-			*error = 0;\
-		return packet_ver;\
-	}\
-//define CHECK_PACKET_VER
-
-	CHECK_PACKET_VER();//Default packet version found.
-	
-	for (packet_ver = MAX_PACKET_VER; packet_ver > 0; packet_ver--)
-	{	//Start guessing the version, giving priority to the newer ones. [Skotlex]
-		CHECK_PACKET_VER();
-	}
-	if( error )
-		*error = err;
-	packet_ver = -1;
-	return -1;
-#undef SET_ERROR
-#undef CHECK_PACKET_VER
-}
-
 // ------------
 // clif_parse_*
 // ------------
@@ -8879,7 +8804,6 @@ void clif_parse_WantToConnection(int fd, TBL_PC* sd)
 	struct auth_node* node;
 	int cmd, account_id, char_id, login_id1, sex;
 	unsigned int client_tick; //The client tick is a tick, therefore it needs be unsigned. [Skotlex]
-	int packet_ver;	// 5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 (by [Yor])
 
 	if (sd) {
 		ShowError("clif_parse_WantToConnection : invalid request (character already logged in)\n");
@@ -8887,27 +8811,13 @@ void clif_parse_WantToConnection(int fd, TBL_PC* sd)
 	}
 
 	// Only valid packet version get here
-	packet_ver = clif_guess_PacketVer(fd, 1, NULL);
 
 	cmd = RFIFOW(fd,0);
-	account_id  = RFIFOL(fd, packet_db[packet_ver][cmd].pos[0]);
-	char_id     = RFIFOL(fd, packet_db[packet_ver][cmd].pos[1]);
-	login_id1   = RFIFOL(fd, packet_db[packet_ver][cmd].pos[2]);
-	client_tick = RFIFOL(fd, packet_db[packet_ver][cmd].pos[3]);
-	sex         = RFIFOB(fd, packet_db[packet_ver][cmd].pos[4]);
-
-	if( packet_ver < 5 || // reject really old client versions
-			(packet_ver <= 9 && (battle_config.packet_ver_flag & 1) == 0) || // older than 6sept04
-			(packet_ver > 9 && (battle_config.packet_ver_flag & 1<<(packet_ver-9)) == 0)) // version not allowed
-	{// packet version rejected
-		ShowInfo("Rejected connection attempt, forbidden packet version (AID/CID: '"CL_WHITE"%d/%d"CL_RESET"', Packet Ver: '"CL_WHITE"%d"CL_RESET"', IP: '"CL_WHITE"%s"CL_RESET"').\n", account_id, char_id, packet_ver, ip2str(session[fd]->client_addr, NULL));
-		WFIFOHEAD(fd,packet_len(0x6a));
-		WFIFOW(fd,0) = 0x6a;
-		WFIFOB(fd,2) = 5; // Your Game's EXE file is not the latest version
-		WFIFOSET(fd,packet_len(0x6a));
-		set_eof(fd);
-		return;
-	}
+	account_id  = RFIFOL(fd, packet_db[1][cmd].pos[0]);
+	char_id     = RFIFOL(fd, packet_db[1][cmd].pos[1]);
+	login_id1   = RFIFOL(fd, packet_db[1][cmd].pos[2]);
+	client_tick = RFIFOL(fd, packet_db[1][cmd].pos[3]);
+	sex         = RFIFOB(fd, packet_db[1][cmd].pos[4]);
 
 	if( runflag != MAPSERVER_ST_RUNNING )
 	{// not allowed
@@ -8937,7 +8847,6 @@ void clif_parse_WantToConnection(int fd, TBL_PC* sd)
 
 	CREATE(sd, TBL_PC, 1);
 	sd->fd = fd;
-	sd->packet_ver = packet_ver;
 	session[fd]->session_data = sd;
 
 	pc_setnewpc(sd, account_id, char_id, login_id1, client_tick, sex, fd);
@@ -9254,7 +9163,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 /// There are various variants of this packet, some of them have padding between fields.
 void clif_parse_TickSend(int fd, struct map_session_data *sd)
 {
-	sd->client_tick = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	sd->client_tick = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 
 	WFIFOHEAD(fd, packet_len(0x7f));
 	WFIFOW(fd,0)=0x7f;
@@ -9299,12 +9208,12 @@ void clif_parse_Hotkey(int fd, struct map_session_data *sd) {
 	int cmd;
 
 	cmd = RFIFOW(fd, 0);
-	idx = RFIFOW(fd, packet_db[sd->packet_ver][cmd].pos[0]);
+	idx = RFIFOW(fd, packet_db[1][cmd].pos[0]);
 	if (idx >= MAX_HOTKEYS) return;
 
-	sd->status.hotkeys[idx].type = RFIFOB(fd, packet_db[sd->packet_ver][cmd].pos[1]);
-	sd->status.hotkeys[idx].id = RFIFOL(fd, packet_db[sd->packet_ver][cmd].pos[2]);
-	sd->status.hotkeys[idx].lv = RFIFOW(fd, packet_db[sd->packet_ver][cmd].pos[3]);
+	sd->status.hotkeys[idx].type = RFIFOB(fd, packet_db[1][cmd].pos[1]);
+	sd->status.hotkeys[idx].id = RFIFOL(fd, packet_db[1][cmd].pos[2]);
+	sd->status.hotkeys[idx].lv = RFIFOW(fd, packet_db[1][cmd].pos[3]);
 #endif
 }
 
@@ -9374,7 +9283,7 @@ void clif_parse_WalkToXY(int fd, struct map_session_data *sd)
 
 	pc_delinvincibletimer(sd);
 
-	RFIFOPOS(fd, packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0], &x, &y, NULL);
+	RFIFOPOS(fd, packet_db[1][RFIFOW(fd,0)].pos[0], &x, &y, NULL);
 
 	//Set last idle time... [Skotlex]
 	sd->idletime = last_tick;
@@ -9411,7 +9320,7 @@ void clif_parse_QuitGame(int fd, struct map_session_data *sd)
 /// There are various variants of this packet, some of them have padding between fields.
 void clif_parse_GetCharNameRequest(int fd, struct map_session_data *sd)
 {
-	int id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	int id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	struct block_list* bl;
 	//struct status_change *sc;
 	
@@ -9571,8 +9480,8 @@ void clif_parse_ChangeDir(int fd, struct map_session_data *sd)
 {
 	unsigned char headdir, dir;
 
-	headdir = RFIFOB(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
-	dir = RFIFOB(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
+	headdir = RFIFOB(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
+	dir = RFIFOB(fd,packet_db[1][RFIFOW(fd,0)].pos[1]);
 	pc_setdir(sd, dir, headdir);
 
 	clif_changed_dir(&sd->bl, AREA_WOS);
@@ -9585,7 +9494,7 @@ void clif_parse_ChangeDir(int fd, struct map_session_data *sd)
 ///     @see enum emotion_type
 void clif_parse_Emotion(int fd, struct map_session_data *sd)
 {
-	int emoticon = RFIFOB(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	int emoticon = RFIFOB(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 
 	if (battle_config.basic_skill_check == 0 || pc_checkskill(sd, NV_BASIC) >= 2) {
 		if (emoticon == E_MUTE) {// prevent use of the mute emote [Valaris]
@@ -9720,8 +9629,8 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 void clif_parse_ActionRequest(int fd, struct map_session_data *sd)
 {
 	clif_parse_ActionRequest_sub(sd,
-		RFIFOB(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]),
-		RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]),
+		RFIFOB(fd,packet_db[1][RFIFOW(fd,0)].pos[1]),
+		RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]),
 		gettick()
 	);
 }
@@ -9922,7 +9831,7 @@ void clif_parse_TakeItem(int fd, struct map_session_data *sd)
 	struct flooritem_data *fitem;
 	int map_object_id;
 
-	map_object_id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	map_object_id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	
 	fitem = (struct flooritem_data*)map_id2bl(map_object_id);
 
@@ -9964,8 +9873,8 @@ void clif_parse_TakeItem(int fd, struct map_session_data *sd)
 /// There are various variants of this packet, some of them have padding between fields.
 void clif_parse_DropItem(int fd, struct map_session_data *sd)
 {
-	int item_index = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0])-2;
-	int item_amount = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
+	int item_index = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0])-2;
+	int item_amount = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[1]);
 
 	for(;;) {
 		if (pc_isdead(sd))
@@ -10018,7 +9927,7 @@ void clif_parse_UseItem(int fd, struct map_session_data *sd)
 
 	//Whether the item is used or not is irrelevant, the char ain't idle. [Skotlex]
 	sd->idletime = last_tick;
-	n = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0])-2;
+	n = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0])-2;
 	
 	if(n <0 || n >= MAX_INVENTORY)
 		return;
@@ -10543,9 +10452,9 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	int tmp, target_id;
 	unsigned int tick = gettick();
 
-	skilllv = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
-	skillnum = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
-	target_id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[2]);
+	skilllv = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
+	skillnum = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[1]);
+	target_id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[2]);
 
 	if( skilllv < 1 ) skilllv = 1; //No clue, I have seen the client do this with guild skills :/ [Skotlex]
 
@@ -10733,10 +10642,10 @@ void clif_parse_UseSkillToPos(int fd, struct map_session_data *sd)
 		return;
 
 	clif_parse_UseSkillToPosSub(fd, sd,
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), //skill lv
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]), //skill num
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[2]), //pos x
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[3]), //pos y
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0]), //skill lv
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[1]), //skill num
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[2]), //pos x
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[3]), //pos y
 		-1	//Skill more info.
 	);
 }
@@ -10754,11 +10663,11 @@ void clif_parse_UseSkillToPosMoreInfo(int fd, struct map_session_data *sd)
 		return;
 	
 	clif_parse_UseSkillToPosSub(fd, sd,
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), //Skill lv
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]), //Skill num
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[2]), //pos x
-		RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[3]), //pos y
-		packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[4] //skill more info
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0]), //Skill lv
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[1]), //Skill num
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[2]), //pos x
+		RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[3]), //pos y
+		packet_db[1][RFIFOW(fd,0)].pos[4] //skill more info
 	);
 }
 
@@ -10879,7 +10788,7 @@ void clif_parse_WeaponRefine(int fd, struct map_session_data *sd)
 		sd->menuskill_val = sd->menuskill_id = 0;
 		return;
 	}
-	idx = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	idx = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	skill_weaponrefine(sd, idx-2);
 	sd->menuskill_val = sd->menuskill_id = 0;
 }
@@ -11047,7 +10956,7 @@ void clif_parse_SolveCharName(int fd, struct map_session_data *sd)
 {
 	int charid;
 
-	charid = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	charid = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	map_reqnickdb(sd, charid);
 }
 
@@ -11095,8 +11004,8 @@ void clif_parse_MoveToKafra(int fd, struct map_session_data *sd)
 	if (pc_istrading(sd))
 		return;
 	
-	item_index = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0])-2;
-	item_amount = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
+	item_index = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0])-2;
+	item_amount = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[1]);
 	if (item_index < 0 || item_index >= MAX_INVENTORY || item_amount < 1)
 		return;
 
@@ -11116,8 +11025,8 @@ void clif_parse_MoveFromKafra(int fd,struct map_session_data *sd)
 {
 	int item_index, item_amount;
 
-	item_index = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0])-1;
-	item_amount = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
+	item_index = RFIFOW(fd,packet_db[1][RFIFOW(fd,0)].pos[0])-1;
+	item_amount = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[1]);
 
 	if (sd->state.storage_flag == 1)
 		storage_storageget(sd, item_index, item_amount);
@@ -12223,7 +12132,7 @@ void clif_parse_GMRemove2(int fd, struct map_session_data* sd)
 	int account_id;
 	struct map_session_data* pl_sd;
 
-	account_id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	account_id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	if( (pl_sd = map_id2sd(account_id)) != NULL )
 	{
 		char command[NAME_LENGTH+8];
@@ -12261,7 +12170,7 @@ void clif_parse_GMRecall2(int fd, struct map_session_data* sd)
 	int account_id;
 	struct map_session_data* pl_sd;
 
-	account_id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	account_id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 	if( (pl_sd = map_id2sd(account_id)) != NULL )
 	{
 		char command[NAME_LENGTH+8];
@@ -13108,7 +13017,7 @@ void clif_parse_HomMoveTo(int fd, struct map_session_data *sd)
 	struct block_list *bl = NULL;
 	short x, y;
 
-	RFIFOPOS(fd, packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1], &x, &y, NULL);
+	RFIFOPOS(fd, packet_db[1][RFIFOW(fd,0)].pos[1], &x, &y, NULL);
 
 	if( sd->md && sd->md->bl.id == id )
 		bl = &sd->md->bl; // Moving Mercenary
@@ -13160,7 +13069,7 @@ void clif_parse_HomMenu(int fd, struct map_session_data *sd)
 	if(!merc_is_hom_active(sd->hd))
 		return;
 
-	merc_menu(sd,RFIFOB(fd,packet_db[sd->packet_ver][cmd].pos[1]));
+	merc_menu(sd,RFIFOB(fd,packet_db[1][cmd].pos[1]));
 }
 
 
@@ -13236,7 +13145,7 @@ void clif_parse_Check(int fd, struct map_session_data *sd)
 	if(!pc_has_permission(sd, PC_PERM_USE_CHECK))
 		return;
 
-	safestrncpy(charname, (const char*)RFIFOP(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), sizeof(charname));
+	safestrncpy(charname, (const char*)RFIFOP(fd,packet_db[1][RFIFOW(fd,0)].pos[0]), sizeof(charname));
 
 	if( ( pl_sd = map_nick2sd(charname) ) == NULL || pc_get_group_level(sd) < pc_get_group_level(pl_sd) )
 	{
@@ -15057,7 +14966,7 @@ void clif_showdigit(struct map_session_data* sd, unsigned char type, int value)
 ///         Graffiti.
 void clif_parse_LessEffect(int fd, struct map_session_data* sd)
 {
-	int isLess = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	int isLess = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 
 	sd->state.lesseffect = ( isLess != 0 );
 }
@@ -15092,7 +15001,7 @@ static void clif_parse_ReqOpenBuyingStore(int fd, struct map_session_data* sd)
 	unsigned char result;
 	int zenylimit;
 	unsigned int count, packet_len;
-	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+	struct s_packet_db* info = &packet_db[1][RFIFOW(fd,0)];
 
 	packet_len = RFIFOW(fd,info->pos[0]);
 
@@ -15226,7 +15135,7 @@ static void clif_parse_ReqClickBuyingStore(int fd, struct map_session_data* sd)
 {
 	int account_id;
 
-	account_id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
+	account_id = RFIFOL(fd,packet_db[1][RFIFOW(fd,0)].pos[0]);
 
 	buyingstore_open(sd, account_id);
 }
@@ -15266,7 +15175,7 @@ static void clif_parse_ReqTradeBuyingStore(int fd, struct map_session_data* sd)
 	uint8* itemlist;
 	int account_id;
 	unsigned int count, packet_len, buyer_id;
-	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+	struct s_packet_db* info = &packet_db[1][RFIFOW(fd,0)];
 
 	packet_len = RFIFOW(fd,info->pos[0]);
 
@@ -15383,7 +15292,7 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data* sd)
 	const uint8* cardlist;
 	unsigned char type;
 	unsigned int min_price, max_price, packet_len, count, item_count, card_count;
-	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+	struct s_packet_db* info = &packet_db[1][RFIFOW(fd,0)];
 
 	packet_len = RFIFOW(fd,info->pos[0]);
 
@@ -15532,7 +15441,7 @@ static void clif_parse_SearchStoreInfoListItemClick(int fd, struct map_session_d
 {
 	unsigned short nameid;
 	int account_id, store_id;
-	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+	struct s_packet_db* info = &packet_db[1][RFIFOW(fd,0)];
 
 	account_id = RFIFOL(fd,info->pos[0]);
 	store_id   = RFIFOL(fd,info->pos[1]);
@@ -15566,7 +15475,7 @@ void clif_parse_debug(int fd,struct map_session_data *sd)
 
 	if( sd )
 	{
-		packet_len = packet_db[sd->packet_ver][cmd].len;
+		packet_len = packet_db[1][cmd].len;
 
 		if( packet_len == 0 )
 		{// unknown
@@ -15833,7 +15742,7 @@ void clif_msgtable_num(int fd, int line, int num) {
  *------------------------------------------*/
 static int clif_parse(int fd)
 {
-	int cmd, packet_ver, packet_len, err;
+	int cmd, packet_len;
 	TBL_PC* sd;
 	int pnum;
 
@@ -15873,39 +15782,8 @@ static int clif_parse(int fd)
 
 	cmd = RFIFOW(fd,0);
 
-	// identify client's packet version
-	if (sd) {
-		packet_ver = sd->packet_ver;
-	} else {
-		// check authentification packet to know packet version
-		packet_ver = clif_guess_PacketVer(fd, 0, &err);
-		if( err )
-		{// failed to identify packet version
-			ShowInfo("clif_parse: Disconnecting session #%d with unknown packet version%s.\n", fd, (
-				err == 1 ? "" :
-				err == 2 ? ", possibly for having an invalid account_id" :
-				err == 3 ? ", possibly for having an invalid char_id." :
-				/* Uncomment when checks are added in clif_guess_PacketVer. [FlavioJS]
-				err == 4 ? ", possibly for having an invalid login_id1." :
-				err == 5 ? ", possibly for having an invalid client_tick." :
-				*/
-				err == 6 ? ", possibly for having an invalid sex." :
-				". ERROR invalid error code"));
-			WFIFOHEAD(fd,packet_len(0x6a));
-			WFIFOW(fd,0) = 0x6a;
-			WFIFOB(fd,2) = 3; // Rejected from Server
-			WFIFOSET(fd,packet_len(0x6a));
-#ifdef DUMP_INVALID_PACKET
-			ShowDump(RFIFOP(fd,0), RFIFOREST(fd));
-#endif
-			RFIFOSKIP(fd, RFIFOREST(fd));
-			set_eof(fd);
-			return 0;
-		}
-	}
-
 	// filter out invalid / unsupported packets
-	if (cmd > MAX_PACKET_DB || packet_db[packet_ver][cmd].len == 0) {
+	if (cmd > MAX_PACKET_DB || packet_db[1][cmd].len == 0) {
 		ShowWarning("clif_parse: Received unsupported packet (packet 0x%04x, %d bytes received), disconnecting session #%d.\n", cmd, RFIFOREST(fd), fd);
 #ifdef DUMP_INVALID_PACKET
 		ShowDump(RFIFOP(fd,0), RFIFOREST(fd));
@@ -15915,7 +15793,7 @@ static int clif_parse(int fd)
 	}
 
 	// determine real packet length
-	packet_len = packet_db[packet_ver][cmd].len;
+	packet_len = packet_db[1][cmd].len;
 	if (packet_len == -1) { // variable-length packet
 		if (RFIFOREST(fd) < 4)
 			return 0;
@@ -15933,21 +15811,21 @@ static int clif_parse(int fd)
 	if ((int)RFIFOREST(fd) < packet_len)
 		return 0; // not enough data received to form the packet
 
-	if( packet_db[packet_ver][cmd].func == clif_parse_debug )
-		packet_db[packet_ver][cmd].func(fd, sd);
+	if( packet_db[1][cmd].func == clif_parse_debug )
+		packet_db[1][cmd].func(fd, sd);
 	else
-	if( packet_db[packet_ver][cmd].func != NULL )
+	if( packet_db[1][cmd].func != NULL )
 	{
-		if( !sd && packet_db[packet_ver][cmd].func != clif_parse_WantToConnection )
+		if( !sd && packet_db[1][cmd].func != clif_parse_WantToConnection )
 			; //Only valid packet when there is no session
 		else
-		if( sd && sd->bl.prev == NULL && packet_db[packet_ver][cmd].func != clif_parse_LoadEndAck )
+		if( sd && sd->bl.prev == NULL && packet_db[1][cmd].func != clif_parse_LoadEndAck )
 			; //Only valid packet when player is not on a map
 		else
 		if( sd && session[sd->fd]->flag.eof )
 			; //No more packets accepted
 		else
-			packet_db[packet_ver][cmd].func(fd, sd); 
+			packet_db[1][cmd].func(fd, sd); 
 	}
 #ifdef DUMP_UNKNOWN_PACKET
 	else
@@ -15996,19 +15874,264 @@ static int clif_parse(int fd)
 	return 0;
 }
 
+static void packetdb_addpacket(short cmd, int len, char *func, ...)
+{
+	static struct {
+		void (*func)(int, struct map_session_data *);
+		char *name;
+	} clif_parse_func[]={
+		{clif_parse_WantToConnection,"wanttoconnection"},
+		{clif_parse_LoadEndAck,"loadendack"},
+		{clif_parse_TickSend,"ticksend"},
+		{clif_parse_WalkToXY,"walktoxy"},
+		{clif_parse_QuitGame,"quitgame"},
+		{clif_parse_GetCharNameRequest,"getcharnamerequest"},
+		{clif_parse_GlobalMessage,"globalmessage"},
+		{clif_parse_MapMove,"mapmove"},
+		{clif_parse_ChangeDir,"changedir"},
+		{clif_parse_Emotion,"emotion"},
+		{clif_parse_HowManyConnections,"howmanyconnections"},
+		{clif_parse_ActionRequest,"actionrequest"},
+		{clif_parse_Restart,"restart"},
+		{clif_parse_WisMessage,"wis"},
+		{clif_parse_Broadcast,"broadcast"},
+		{clif_parse_TakeItem,"takeitem"},
+		{clif_parse_DropItem,"dropitem"},
+		{clif_parse_UseItem,"useitem"},
+		{clif_parse_EquipItem,"equipitem"},
+		{clif_parse_UnequipItem,"unequipitem"},
+		{clif_parse_NpcClicked,"npcclicked"},
+		{clif_parse_NpcBuySellSelected,"npcbuysellselected"},
+		{clif_parse_NpcBuyListSend,"npcbuylistsend"},
+		{clif_parse_NpcSellListSend,"npcselllistsend"},
+		{clif_parse_CreateChatRoom,"createchatroom"},
+		{clif_parse_ChatAddMember,"chataddmember"},
+		{clif_parse_ChatRoomStatusChange,"chatroomstatuschange"},
+		{clif_parse_ChangeChatOwner,"changechatowner"},
+		{clif_parse_KickFromChat,"kickfromchat"},
+		{clif_parse_ChatLeave,"chatleave"},
+		{clif_parse_TradeRequest,"traderequest"},
+		{clif_parse_TradeAck,"tradeack"},
+		{clif_parse_TradeAddItem,"tradeadditem"},
+		{clif_parse_TradeOk,"tradeok"},
+		{clif_parse_TradeCancel,"tradecancel"},
+		{clif_parse_TradeCommit,"tradecommit"},
+		{clif_parse_StopAttack,"stopattack"},
+		{clif_parse_PutItemToCart,"putitemtocart"},
+		{clif_parse_GetItemFromCart,"getitemfromcart"},
+		{clif_parse_RemoveOption,"removeoption"},
+		{clif_parse_ChangeCart,"changecart"},
+		{clif_parse_StatusUp,"statusup"},
+		{clif_parse_SkillUp,"skillup"},
+		{clif_parse_UseSkillToId,"useskilltoid"},
+		{clif_parse_UseSkillToPos,"useskilltopos"},
+		{clif_parse_UseSkillToPosMoreInfo,"useskilltoposinfo"},
+		{clif_parse_UseSkillMap,"useskillmap"},
+		{clif_parse_RequestMemo,"requestmemo"},
+		{clif_parse_ProduceMix,"producemix"},
+		{clif_parse_Cooking,"cooking"},
+		{clif_parse_NpcSelectMenu,"npcselectmenu"},
+		{clif_parse_NpcNextClicked,"npcnextclicked"},
+		{clif_parse_NpcAmountInput,"npcamountinput"},
+		{clif_parse_NpcStringInput,"npcstringinput"},
+		{clif_parse_NpcCloseClicked,"npccloseclicked"},
+		{clif_parse_ItemIdentify,"itemidentify"},
+		{clif_parse_SelectArrow,"selectarrow"},
+		{clif_parse_AutoSpell,"autospell"},
+		{clif_parse_UseCard,"usecard"},
+		{clif_parse_InsertCard,"insertcard"},
+		{clif_parse_RepairItem,"repairitem"},
+		{clif_parse_WeaponRefine,"weaponrefine"},
+		{clif_parse_SolveCharName,"solvecharname"},
+		{clif_parse_ResetChar,"resetchar"},
+		{clif_parse_LocalBroadcast,"localbroadcast"},
+		{clif_parse_MoveToKafra,"movetokafra"},
+		{clif_parse_MoveFromKafra,"movefromkafra"},
+		{clif_parse_MoveToKafraFromCart,"movetokafrafromcart"},
+		{clif_parse_MoveFromKafraToCart,"movefromkafratocart"},
+		{clif_parse_CloseKafra,"closekafra"},
+		{clif_parse_CreateParty,"createparty"},
+		{clif_parse_CreateParty2,"createparty2"},
+		{clif_parse_PartyInvite,"partyinvite"},
+		{clif_parse_PartyInvite2,"partyinvite2"},
+		{clif_parse_ReplyPartyInvite,"replypartyinvite"},
+		{clif_parse_ReplyPartyInvite2,"replypartyinvite2"},
+		{clif_parse_LeaveParty,"leaveparty"},
+		{clif_parse_RemovePartyMember,"removepartymember"},
+		{clif_parse_PartyChangeOption,"partychangeoption"},
+		{clif_parse_PartyMessage,"partymessage"},
+		{clif_parse_PartyChangeLeader,"partychangeleader"},
+		{clif_parse_CloseVending,"closevending"},
+		{clif_parse_VendingListReq,"vendinglistreq"},
+		{clif_parse_PurchaseReq,"purchasereq"},
+		{clif_parse_PurchaseReq2,"purchasereq2"},
+		{clif_parse_OpenVending,"openvending"},
+		{clif_parse_CreateGuild,"createguild"},
+		{clif_parse_GuildCheckMaster,"guildcheckmaster"},
+		{clif_parse_GuildRequestInfo,"guildrequestinfo"},
+		{clif_parse_GuildChangePositionInfo,"guildchangepositioninfo"},
+		{clif_parse_GuildChangeMemberPosition,"guildchangememberposition"},
+		{clif_parse_GuildRequestEmblem,"guildrequestemblem"},
+		{clif_parse_GuildChangeEmblem,"guildchangeemblem"},
+		{clif_parse_GuildChangeNotice,"guildchangenotice"},
+		{clif_parse_GuildInvite,"guildinvite"},
+		{clif_parse_GuildReplyInvite,"guildreplyinvite"},
+		{clif_parse_GuildLeave,"guildleave"},
+		{clif_parse_GuildExpulsion,"guildexpulsion"},
+		{clif_parse_GuildMessage,"guildmessage"},
+		{clif_parse_GuildRequestAlliance,"guildrequestalliance"},
+		{clif_parse_GuildReplyAlliance,"guildreplyalliance"},
+		{clif_parse_GuildDelAlliance,"guilddelalliance"},
+		{clif_parse_GuildOpposition,"guildopposition"},
+		{clif_parse_GuildBreak,"guildbreak"},
+		{clif_parse_PetMenu,"petmenu"},
+		{clif_parse_CatchPet,"catchpet"},
+		{clif_parse_SelectEgg,"selectegg"},
+		{clif_parse_SendEmotion,"sendemotion"},
+		{clif_parse_ChangePetName,"changepetname"},
+
+		{clif_parse_GMKick,"gmkick"},
+		{clif_parse_GMHide,"gmhide"},
+		{clif_parse_GMReqNoChat,"gmreqnochat"},
+		{clif_parse_GMReqAccountName,"gmreqaccname"},
+		{clif_parse_GMKickAll,"killall"},
+		{clif_parse_GMRecall,"recall"},
+		{clif_parse_GMRecall,"summon"},
+		{clif_parse_GM_Monster_Item,"itemmonster"},
+		{clif_parse_GMShift,"remove"},
+		{clif_parse_GMShift,"shift"},
+		{clif_parse_GMChangeMapType,"changemaptype"},
+		{clif_parse_GMRc,"rc"},
+		{clif_parse_GMRecall2,"recall2"},
+		{clif_parse_GMRemove2,"remove2"},
+
+		{clif_parse_NoviceDoriDori,"sndoridori"},
+		{clif_parse_NoviceExplosionSpirits,"snexplosionspirits"},
+		{clif_parse_PMIgnore,"wisexin"},
+		{clif_parse_PMIgnoreList,"wisexlist"},
+		{clif_parse_PMIgnoreAll,"wisall"},
+		{clif_parse_FriendsListAdd,"friendslistadd"},
+		{clif_parse_FriendsListRemove,"friendslistremove"},
+		{clif_parse_FriendsListReply,"friendslistreply"},
+		{clif_parse_Blacksmith,"blacksmith"},
+		{clif_parse_Alchemist,"alchemist"},
+		{clif_parse_Taekwon,"taekwon"},
+		{clif_parse_RankingPk,"rankingpk"},
+		{clif_parse_FeelSaveOk,"feelsaveok"},
+		{clif_parse_debug,"debug"},
+		{clif_parse_ChangeHomunculusName,"changehomunculusname"},
+		{clif_parse_HomMoveToMaster,"hommovetomaster"},
+		{clif_parse_HomMoveTo,"hommoveto"},
+		{clif_parse_HomAttack,"homattack"},
+		{clif_parse_HomMenu,"hommenu"},
+		{clif_parse_StoragePassword,"storagepassword"},
+		{clif_parse_Hotkey,"hotkey"},
+		{clif_parse_AutoRevive,"autorevive"},
+		{clif_parse_Check,"check"},
+		{clif_parse_Adopt_request,"adoptrequest"},
+		{clif_parse_Adopt_reply,"adoptreply"},
+		// MAIL SYSTEM
+		{clif_parse_Mail_refreshinbox,"mailrefresh"},
+		{clif_parse_Mail_read,"mailread"},
+		{clif_parse_Mail_getattach,"mailgetattach"},
+		{clif_parse_Mail_delete,"maildelete"},
+		{clif_parse_Mail_return,"mailreturn"},
+		{clif_parse_Mail_setattach,"mailsetattach"},
+		{clif_parse_Mail_winopen,"mailwinopen"},
+		{clif_parse_Mail_send,"mailsend"},
+		// AUCTION SYSTEM
+		{clif_parse_Auction_search,"auctionsearch"},
+		{clif_parse_Auction_buysell,"auctionbuysell"},
+		{clif_parse_Auction_setitem,"auctionsetitem"},
+		{clif_parse_Auction_cancelreg,"auctioncancelreg"},
+		{clif_parse_Auction_register,"auctionregister"},
+		{clif_parse_Auction_cancel,"auctioncancel"},
+		{clif_parse_Auction_close,"auctionclose"},
+		{clif_parse_Auction_bid,"auctionbid"},
+		// Quest Log System
+		{clif_parse_questStateAck,"queststate"},
+		{clif_parse_cashshop_buy,"cashshopbuy"},
+		{clif_parse_ViewPlayerEquip,"viewplayerequip"},
+		{clif_parse_EquipTick,"equiptickbox"},
+		{clif_parse_BattleChat,"battlechat"},
+		{clif_parse_mercenary_action,"mermenu"},
+		{clif_parse_progressbar,"progressbar"},
+#if PACKETVER >= 20091229
+		{clif_parse_PartyBookingRegisterReq,"bookingregreq"},
+		{clif_parse_PartyBookingSearchReq,"bookingsearchreq"},
+		{clif_parse_PartyBookingUpdateReq,"bookingupdatereq"},
+		{clif_parse_PartyBookingDeleteReq,"bookingdelreq"},
+#endif
+		{clif_parse_PVPInfo,"pvpinfo"},
+		{clif_parse_LessEffect,"lesseffect"},
+		// Buying Store
+		{clif_parse_ReqOpenBuyingStore,"reqopenbuyingstore"},
+		{clif_parse_ReqCloseBuyingStore,"reqclosebuyingstore"},
+		{clif_parse_ReqClickBuyingStore,"reqclickbuyingstore"},
+		{clif_parse_ReqTradeBuyingStore,"reqtradebuyingstore"},
+		// Store Search
+		{clif_parse_SearchStoreInfo,"searchstoreinfo"},
+		{clif_parse_SearchStoreInfoNextPage,"searchstoreinfonextpage"},
+		{clif_parse_CloseSearchStoreInfo,"closesearchstoreinfo"},
+		{clif_parse_SearchStoreInfoListItemClick,"searchstoreinfolistitemclick"},
+		{NULL,NULL}
+	};
+
+	if (cmd > MAX_PACKET_DB)
+	{
+		ShowError("PacketDB: Pacote 0x%x é maior que o máximo permitido(0x%x), ignorando.", cmd, MAX_PACKET_DB);
+		return;
+	}
+
+	packet_db[1][cmd].len = len;
+	
+	if (func != NULL)
+	{
+		int i, found = 0;
+
+		for (i = 0; clif_parse_func[i].name; i++)
+		{
+			if (stricmp(func, clif_parse_func[i].name) == 0)
+			{
+				found = 1;
+				break;
+			}
+		}
+
+
+		if (found)
+		{
+			va_list va;
+			packet_db[1][cmd].func = clif_parse_func[i].func;
+
+			if (stricmp("wanttoconnection", func) == 0)
+				clif_config.connect_cmd = cmd;
+			
+			va_start(va, func);
+			for (i = 0; i < MAX_PACKET_POS; i++)
+			{
+				unsigned short pos = va_arg(va, unsigned short);
+
+				if (pos == 0xFFFF)
+					break;
+
+				packet_db[1][cmd].pos[i] = pos;
+			}
+			va_end(va);
+		}
+		else
+		{
+			ShowError("PacketDB: Função desconhecida: %s\n", func);
+		}
+	}
+}
+
 /*==========================================
  * Reads packet_db.txt and setups its array reference
  *------------------------------------------*/
 static int packetdb_readdb(void)
 {
-	FILE *fp;
-	char line[1024];
-	int ln=0;
-	int cmd,i,j,packet_ver;
-	int max_cmd=-1;
-	int skip_ver = 0;
-	int warned = 0;
-	char *str[64],*p,*str2[64],*p2,w1[64],w2[64];
+	int i;
 	int packet_len_table[MAX_PACKET_DB] = {
 	   10,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -16220,346 +16343,16 @@ static int packetdb_readdb(void)
 	    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	};
-	struct {
-		void (*func)(int, struct map_session_data *);
-		char *name;
-	} clif_parse_func[]={
-		{clif_parse_WantToConnection,"wanttoconnection"},
-		{clif_parse_LoadEndAck,"loadendack"},
-		{clif_parse_TickSend,"ticksend"},
-		{clif_parse_WalkToXY,"walktoxy"},
-		{clif_parse_QuitGame,"quitgame"},
-		{clif_parse_GetCharNameRequest,"getcharnamerequest"},
-		{clif_parse_GlobalMessage,"globalmessage"},
-		{clif_parse_MapMove,"mapmove"},
-		{clif_parse_ChangeDir,"changedir"},
-		{clif_parse_Emotion,"emotion"},
-		{clif_parse_HowManyConnections,"howmanyconnections"},
-		{clif_parse_ActionRequest,"actionrequest"},
-		{clif_parse_Restart,"restart"},
-		{clif_parse_WisMessage,"wis"},
-		{clif_parse_Broadcast,"broadcast"},
-		{clif_parse_TakeItem,"takeitem"},
-		{clif_parse_DropItem,"dropitem"},
-		{clif_parse_UseItem,"useitem"},
-		{clif_parse_EquipItem,"equipitem"},
-		{clif_parse_UnequipItem,"unequipitem"},
-		{clif_parse_NpcClicked,"npcclicked"},
-		{clif_parse_NpcBuySellSelected,"npcbuysellselected"},
-		{clif_parse_NpcBuyListSend,"npcbuylistsend"},
-		{clif_parse_NpcSellListSend,"npcselllistsend"},
-		{clif_parse_CreateChatRoom,"createchatroom"},
-		{clif_parse_ChatAddMember,"chataddmember"},
-		{clif_parse_ChatRoomStatusChange,"chatroomstatuschange"},
-		{clif_parse_ChangeChatOwner,"changechatowner"},
-		{clif_parse_KickFromChat,"kickfromchat"},
-		{clif_parse_ChatLeave,"chatleave"},
-		{clif_parse_TradeRequest,"traderequest"},
-		{clif_parse_TradeAck,"tradeack"},
-		{clif_parse_TradeAddItem,"tradeadditem"},
-		{clif_parse_TradeOk,"tradeok"},
-		{clif_parse_TradeCancel,"tradecancel"},
-		{clif_parse_TradeCommit,"tradecommit"},
-		{clif_parse_StopAttack,"stopattack"},
-		{clif_parse_PutItemToCart,"putitemtocart"},
-		{clif_parse_GetItemFromCart,"getitemfromcart"},
-		{clif_parse_RemoveOption,"removeoption"},
-		{clif_parse_ChangeCart,"changecart"},
-		{clif_parse_StatusUp,"statusup"},
-		{clif_parse_SkillUp,"skillup"},
-		{clif_parse_UseSkillToId,"useskilltoid"},
-		{clif_parse_UseSkillToPos,"useskilltopos"},
-		{clif_parse_UseSkillToPosMoreInfo,"useskilltoposinfo"},
-		{clif_parse_UseSkillMap,"useskillmap"},
-		{clif_parse_RequestMemo,"requestmemo"},
-		{clif_parse_ProduceMix,"producemix"},
-		{clif_parse_Cooking,"cooking"},
-		{clif_parse_NpcSelectMenu,"npcselectmenu"},
-		{clif_parse_NpcNextClicked,"npcnextclicked"},
-		{clif_parse_NpcAmountInput,"npcamountinput"},
-		{clif_parse_NpcStringInput,"npcstringinput"},
-		{clif_parse_NpcCloseClicked,"npccloseclicked"},
-		{clif_parse_ItemIdentify,"itemidentify"},
-		{clif_parse_SelectArrow,"selectarrow"},
-		{clif_parse_AutoSpell,"autospell"},
-		{clif_parse_UseCard,"usecard"},
-		{clif_parse_InsertCard,"insertcard"},
-		{clif_parse_RepairItem,"repairitem"},
-		{clif_parse_WeaponRefine,"weaponrefine"},
-		{clif_parse_SolveCharName,"solvecharname"},
-		{clif_parse_ResetChar,"resetchar"},
-		{clif_parse_LocalBroadcast,"localbroadcast"},
-		{clif_parse_MoveToKafra,"movetokafra"},
-		{clif_parse_MoveFromKafra,"movefromkafra"},
-		{clif_parse_MoveToKafraFromCart,"movetokafrafromcart"},
-		{clif_parse_MoveFromKafraToCart,"movefromkafratocart"},
-		{clif_parse_CloseKafra,"closekafra"},
-		{clif_parse_CreateParty,"createparty"},
-		{clif_parse_CreateParty2,"createparty2"},
-		{clif_parse_PartyInvite,"partyinvite"},
-		{clif_parse_PartyInvite2,"partyinvite2"},
-		{clif_parse_ReplyPartyInvite,"replypartyinvite"},
-		{clif_parse_ReplyPartyInvite2,"replypartyinvite2"},
-		{clif_parse_LeaveParty,"leaveparty"},
-		{clif_parse_RemovePartyMember,"removepartymember"},
-		{clif_parse_PartyChangeOption,"partychangeoption"},
-		{clif_parse_PartyMessage,"partymessage"},
-		{clif_parse_PartyChangeLeader,"partychangeleader"},
-		{clif_parse_CloseVending,"closevending"},
-		{clif_parse_VendingListReq,"vendinglistreq"},
-		{clif_parse_PurchaseReq,"purchasereq"},
-		{clif_parse_PurchaseReq2,"purchasereq2"},
-		{clif_parse_OpenVending,"openvending"},
-		{clif_parse_CreateGuild,"createguild"},
-		{clif_parse_GuildCheckMaster,"guildcheckmaster"},
-		{clif_parse_GuildRequestInfo,"guildrequestinfo"},
-		{clif_parse_GuildChangePositionInfo,"guildchangepositioninfo"},
-		{clif_parse_GuildChangeMemberPosition,"guildchangememberposition"},
-		{clif_parse_GuildRequestEmblem,"guildrequestemblem"},
-		{clif_parse_GuildChangeEmblem,"guildchangeemblem"},
-		{clif_parse_GuildChangeNotice,"guildchangenotice"},
-		{clif_parse_GuildInvite,"guildinvite"},
-		{clif_parse_GuildReplyInvite,"guildreplyinvite"},
-		{clif_parse_GuildLeave,"guildleave"},
-		{clif_parse_GuildExpulsion,"guildexpulsion"},
-		{clif_parse_GuildMessage,"guildmessage"},
-		{clif_parse_GuildRequestAlliance,"guildrequestalliance"},
-		{clif_parse_GuildReplyAlliance,"guildreplyalliance"},
-		{clif_parse_GuildDelAlliance,"guilddelalliance"},
-		{clif_parse_GuildOpposition,"guildopposition"},
-		{clif_parse_GuildBreak,"guildbreak"},
-		{clif_parse_PetMenu,"petmenu"},
-		{clif_parse_CatchPet,"catchpet"},
-		{clif_parse_SelectEgg,"selectegg"},
-		{clif_parse_SendEmotion,"sendemotion"},
-		{clif_parse_ChangePetName,"changepetname"},
-
-		{clif_parse_GMKick,"gmkick"},
-		{clif_parse_GMHide,"gmhide"},
-		{clif_parse_GMReqNoChat,"gmreqnochat"},
-		{clif_parse_GMReqAccountName,"gmreqaccname"},
-		{clif_parse_GMKickAll,"killall"},
-		{clif_parse_GMRecall,"recall"},
-		{clif_parse_GMRecall,"summon"},
-		{clif_parse_GM_Monster_Item,"itemmonster"},
-		{clif_parse_GMShift,"remove"},
-		{clif_parse_GMShift,"shift"},
-		{clif_parse_GMChangeMapType,"changemaptype"},
-		{clif_parse_GMRc,"rc"},
-		{clif_parse_GMRecall2,"recall2"},
-		{clif_parse_GMRemove2,"remove2"},
-
-		{clif_parse_NoviceDoriDori,"sndoridori"},
-		{clif_parse_NoviceExplosionSpirits,"snexplosionspirits"},
-		{clif_parse_PMIgnore,"wisexin"},
-		{clif_parse_PMIgnoreList,"wisexlist"},
-		{clif_parse_PMIgnoreAll,"wisall"},
-		{clif_parse_FriendsListAdd,"friendslistadd"},
-		{clif_parse_FriendsListRemove,"friendslistremove"},
-		{clif_parse_FriendsListReply,"friendslistreply"},
-		{clif_parse_Blacksmith,"blacksmith"},
-		{clif_parse_Alchemist,"alchemist"},
-		{clif_parse_Taekwon,"taekwon"},
-		{clif_parse_RankingPk,"rankingpk"},
-		{clif_parse_FeelSaveOk,"feelsaveok"},
-		{clif_parse_debug,"debug"},
-		{clif_parse_ChangeHomunculusName,"changehomunculusname"},
-		{clif_parse_HomMoveToMaster,"hommovetomaster"},
-		{clif_parse_HomMoveTo,"hommoveto"},
-		{clif_parse_HomAttack,"homattack"},
-		{clif_parse_HomMenu,"hommenu"},
-		{clif_parse_StoragePassword,"storagepassword"},
-		{clif_parse_Hotkey,"hotkey"},
-		{clif_parse_AutoRevive,"autorevive"},
-		{clif_parse_Check,"check"},
-		{clif_parse_Adopt_request,"adoptrequest"},
-		{clif_parse_Adopt_reply,"adoptreply"},
-		// MAIL SYSTEM
-		{clif_parse_Mail_refreshinbox,"mailrefresh"},
-		{clif_parse_Mail_read,"mailread"},
-		{clif_parse_Mail_getattach,"mailgetattach"},
-		{clif_parse_Mail_delete,"maildelete"},
-		{clif_parse_Mail_return,"mailreturn"},
-		{clif_parse_Mail_setattach,"mailsetattach"},
-		{clif_parse_Mail_winopen,"mailwinopen"},
-		{clif_parse_Mail_send,"mailsend"},
-		// AUCTION SYSTEM
-		{clif_parse_Auction_search,"auctionsearch"},
-		{clif_parse_Auction_buysell,"auctionbuysell"},
-		{clif_parse_Auction_setitem,"auctionsetitem"},
-		{clif_parse_Auction_cancelreg,"auctioncancelreg"},
-		{clif_parse_Auction_register,"auctionregister"},
-		{clif_parse_Auction_cancel,"auctioncancel"},
-		{clif_parse_Auction_close,"auctionclose"},
-		{clif_parse_Auction_bid,"auctionbid"},
-		// Quest Log System
-		{clif_parse_questStateAck,"queststate"},
-		{clif_parse_cashshop_buy,"cashshopbuy"},
-		{clif_parse_ViewPlayerEquip,"viewplayerequip"},
-		{clif_parse_EquipTick,"equiptickbox"},
-		{clif_parse_BattleChat,"battlechat"},
-		{clif_parse_mercenary_action,"mermenu"},
-		{clif_parse_progressbar,"progressbar"},
-#if PACKETVER >= 20091229
-		{clif_parse_PartyBookingRegisterReq,"bookingregreq"},
-		{clif_parse_PartyBookingSearchReq,"bookingsearchreq"},
-		{clif_parse_PartyBookingUpdateReq,"bookingupdatereq"},
-		{clif_parse_PartyBookingDeleteReq,"bookingdelreq"},
-#endif
-		{clif_parse_PVPInfo,"pvpinfo"},
-		{clif_parse_LessEffect,"lesseffect"},
-		// Buying Store
-		{clif_parse_ReqOpenBuyingStore,"reqopenbuyingstore"},
-		{clif_parse_ReqCloseBuyingStore,"reqclosebuyingstore"},
-		{clif_parse_ReqClickBuyingStore,"reqclickbuyingstore"},
-		{clif_parse_ReqTradeBuyingStore,"reqtradebuyingstore"},
-		// Store Search
-		{clif_parse_SearchStoreInfo,"searchstoreinfo"},
-		{clif_parse_SearchStoreInfoNextPage,"searchstoreinfonextpage"},
-		{clif_parse_CloseSearchStoreInfo,"closesearchstoreinfo"},
-		{clif_parse_SearchStoreInfoListItemClick,"searchstoreinfolistitemclick"},
-		{NULL,NULL}
-	};
 
 	// initialize packet_db[SERVER] from hardcoded packet_len_table[] values
 	memset(packet_db,0,sizeof(packet_db));
 	for( i = 0; i < ARRAYLENGTH(packet_len_table); ++i )
 		packet_len(i) = packet_len_table[i];
 
-	sprintf(line, "%s/packet_db.txt", db_path);
-	if( (fp=fopen(line,"r"))==NULL ){
-		ShowFatalError("can't read %s\n", line);
-		exit(EXIT_FAILURE);
-	}
+#define addpacket(id, size, func, ...) packetdb_addpacket(id, size, func, __VA_ARGS__, 0xFFFF)
+#include "packetdb.h"
+#undef addpacket
 
-	clif_config.packet_db_ver = MAX_PACKET_VER;
-	packet_ver = MAX_PACKET_VER;	// read into packet_db's version by default
-	while( fgets(line, sizeof(line), fp) )
-	{
-		ln++;
-		if(line[0]=='/' && line[1]=='/')
-			continue;
-		if (sscanf(line,"%256[^:]: %256[^\r\n]",w1,w2) == 2)
-		{
-			if(strcmpi(w1,"packet_ver")==0) {
-				int prev_ver = packet_ver;
-				skip_ver = 0;
-				packet_ver = atoi(w2);
-				if ( packet_ver > MAX_PACKET_VER )
-				{	//Check to avoid overflowing. [Skotlex]
-					if( (warned&1) == 0 )
-						ShowWarning("The packet_db table only has support up to version %d.\n", MAX_PACKET_VER);
-					warned &= 1;
-					skip_ver = 1;
-				}
-				else if( packet_ver < 0 )
-				{
-					if( (warned&2) == 0 )
-						ShowWarning("Negative packet versions are not supported.\n");
-					warned &= 2;
-					skip_ver = 1;
-				}
-				else if( packet_ver == SERVER )
-				{
-					if( (warned&4) == 0 )
-						ShowWarning("Packet version %d is reserved for server use only.\n", SERVER);
-					warned &= 4;
-					skip_ver = 1;
-				}
-
-				if( skip_ver )
-				{
-					ShowWarning("Skipping packet version %d.\n", packet_ver);
-					packet_ver = prev_ver;
-					continue;
-				}
-				// copy from previous version into new version and continue
-				// - indicating all following packets should be read into the newer version
-				memcpy(&packet_db[packet_ver], &packet_db[prev_ver], sizeof(packet_db[0]));
-				continue;
-			} else if(strcmpi(w1,"packet_db_ver")==0) {
-				if(strcmpi(w2,"default")==0) //This is the preferred version.
-					clif_config.packet_db_ver = MAX_PACKET_VER;
-				else // to manually set the packet DB version
-					clif_config.packet_db_ver = cap_value(atoi(w2), 0, MAX_PACKET_VER);
-				
-				continue;
-			}
-		}
-
-		if( skip_ver != 0 )
-			continue; // Skipping current packet version
-
-		memset(str,0,sizeof(str));
-		for(j=0,p=line;j<4 && p; ++j)
-		{
-			str[j]=p;
-			p=strchr(p,',');
-			if(p) *p++=0;
-		}
-		if(str[0]==NULL)
-			continue;
-		cmd=strtol(str[0],(char **)NULL,0);
-		if(max_cmd < cmd)
-			max_cmd = cmd;
-		if(cmd <= 0 || cmd > MAX_PACKET_DB)
-			continue;
-		if(str[1]==NULL){
-			ShowError("packet_db: packet len error\n");
-			continue;
-		}
-
-		packet_db[packet_ver][cmd].len = (short)atoi(str[1]);
-
-		if(str[2]==NULL){
-			packet_db[packet_ver][cmd].func = NULL;
-			ln++;
-			continue;
-		}
-
-		// look up processing function by name
-		ARR_FIND( 0, ARRAYLENGTH(clif_parse_func), j, clif_parse_func[j].name != NULL && strcmp(str[2],clif_parse_func[j].name)==0 );
-		if( j < ARRAYLENGTH(clif_parse_func) )
-			packet_db[packet_ver][cmd].func = clif_parse_func[j].func;
-
-		// set the identifying cmd for the packet_db version
-		if (strcmp(str[2],"wanttoconnection")==0)
-			clif_config.connect_cmd[packet_ver] = cmd;
-			
-		if(str[3]==NULL){
-			ShowError("packet_db: packet error\n");
-			exit(EXIT_FAILURE);
-		}
-		for(j=0,p2=str[3];p2;j++){
-			short k;
-			str2[j]=p2;
-			p2=strchr(p2,':');
-			if(p2) *p2++=0;
-			k = atoi(str2[j]);
-			// if (packet_db[packet_ver][cmd].pos[j] != k && clif_config.prefer_packet_db)	// not used for now
-
-			if( j >= MAX_PACKET_POS )
-			{
-				ShowError("Too many positions found for packet 0x%04x (max=%d).\n", cmd, MAX_PACKET_POS);
-				break;
-			}
-
-			packet_db[packet_ver][cmd].pos[j] = k;
-		}
-	}
-	fclose(fp);
-	if(max_cmd > MAX_PACKET_DB)
-	{
-		ShowWarning("Found packets up to 0x%X, ignored 0x%X and above.\n", max_cmd, MAX_PACKET_DB);
-		ShowWarning("Please increase MAX_PACKET_DB and recompile.\n");
-	}
-	if (!clif_config.connect_cmd[clif_config.packet_db_ver])
-	{	//Locate the nearest version that we still support. [Skotlex]
-		for(j = clif_config.packet_db_ver; j >= 0 && !clif_config.connect_cmd[j]; j--);
-		
-		clif_config.packet_db_ver = j?j:MAX_PACKET_VER;
-	}
-	ShowStatus("Done reading packet database from '"CL_WHITE"%s"CL_RESET"'. Using default packet version: "CL_WHITE"%d"CL_RESET".\n", "packet_db.txt", clif_config.packet_db_ver);
 	return 0;
 }
 
@@ -16568,8 +16361,7 @@ static int packetdb_readdb(void)
  *------------------------------------------*/
 int do_init_clif(void)
 {
-	clif_config.packet_db_ver = -1; // the main packet version of the DB
-	memset(clif_config.connect_cmd, 0, sizeof(clif_config.connect_cmd)); //The default connect command will be determined after reading the packet_db [Skotlex]
+	clif_config.connect_cmd = 0;
 
 	memset(packet_db,0,sizeof(packet_db));
 	//Using the packet_db file is the only way to set up packets now [Skotlex]

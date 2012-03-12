@@ -45,7 +45,7 @@
 // 20111025 - 2011-10-25aRagexeRE+ - 0x6b, 0x6d
 
 // Descomente isso caso for usar clients do bRO
-//#define BRO_CLIENT
+#define BRO_CLIENT
 
 #ifndef PACKETVER
 	#define PACKETVER 20111102
@@ -60,6 +60,17 @@
 #if PACKETVER == 9
 #undef PACKETVER
 #define PACKETVER 20071106
+#endif
+
+#ifdef BRO_CLIENT
+#define STORAGE_PASSWORD
+#endif
+
+#ifdef STORAGE_PASSWORD
+
+// Comente a seguinte linha caso tenha desativo a criptografia dos pacotes do storagePassword via diff.
+#define STORAGE_PASSWORD_KEY { 0x050B6F79, 0x0202C179, 0x0E20120, 0x04FA43E3, 0x0179B6C8, 0x05973DF2, 0x07D8D6B, 0x08CB9ED9 }
+
 #endif
 
 //Remove/Comment this line to disable sc_data saving. [Skotlex]
