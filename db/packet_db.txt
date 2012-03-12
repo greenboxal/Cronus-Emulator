@@ -1,42 +1,38 @@
-// Client<->Map Packet Database
+//--------------------------------------------------------------
+// _________                                    
+// \_   ___ \_______  ____   ____  __ __  ______
+// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
+// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
+//  \______  /|__|   \____/|___|  /____//____  >
+//         \/                   \/           \/  
+//--------------------------------------------------------------
+// Banco de Dados de Pacotes (Client<->Map Packet)
+//--------------------------------------------------------------
+// Estrutura do banco de dados:
+// TipoPacket,TamanhoPacket[,Nome,IndiceCampo1:IndiceCampo2:...]
 //
-// Structure of Database:
-// PacketType,PacketLength[,Name,FieldIndex1:FieldIndex2:FieldIndex3:...]
-//
-// 01. PacketType       ID of the packet.
-// 02. PacketLength     Length of the packet. If 0, packet is disabled in current packet version. If -1, packet has variable size.
-// 03. Name             Name of the packet parser function (optional, for incoming packets only).
-// 04. FieldIndex       Specifies the offset of a packet field in bytes from the begin of the packet (only specified when Name is given).
+// 01. TipoPacket       ID of the packet.
+// 02. TamanhoPacket    Length of the packet. If 0, packet is disabled in current packet version. If -1, packet has variable size.
+// 03. Nome             Name of the packet parser function (optional, for incoming packets only).
+// 04. IndiceCampo      Specifies the offset of a packet field in bytes from the begin of the packet (only specified when Name is given).
 //                      Can be 0, when the layout is not known.
-// ...
 //
-// NOTE: Up to MAX_PACKET_POS (typically 20) field indexes may be used.
+// NOTA: valores até MAX_PACKET_POS (tipicamente 20) índices de campo podem ser usadas.
 //
-// The packet database allows you to add support for new clients,
-// because packets change every release.
+// O banco de dados de packets permite você adicionar suporte a novos clients,
+// já que os packets mudam a cada lançamento.
 //
-// Note: Every packet version needs a wanttoconnection specification, since
-// that is the packet used to identify a client's version.
-// If multiple versions have the same connection packet, the higher version
-// will be used (unless the lower one is specified as the default)
+// Nota: Toda versão de packets precisa da especificação wanttoconnection, já que
+// este é o packet usado para identificar a versão do client.
+// Se múltiplas versões tiverem o mesmo packet de conexão, a maior versão
+// será usada (ao menos que a menor seja especificada para ser usada)
 //
-// Incoming packets have their parser function and layout specified, which enables
-// them for the current and all higher versions, unless explicitely disabled.
-//
-// Outgoing packets must be specified in order to enable them for the current
-// and all higher versions, unless explicitely disabled. Packets that are not
-// enabled for a packet version are silently discarded when sent as multicast.
-//
-// Every packet version inherits packet definitions from the previous (lower)
-// packet version.
-//
-// Main packet version of the DB to use (default = max available version)
-// Client detection is faster when all clients use this version.
-// Version 23 is the latest Sakexe (above versions are for Renewal clients)
-//packet_db_ver: 25
-packet_db_ver: default
+// Se você deseja usar a última versão possível, coloque default.
+// A versão 23 é o último Sakexe, versão mais recentes remetem ao RagexeRE
+//--------------------------------------------------------------
 
-//packet_db_ver: 23
+packet_db_ver: 28
+
 packet_ver: 5
 0x0064,55
 0x0065,17
@@ -81,7 +77,7 @@ packet_ver: 5
 0x008c,-1,globalmessage,2:4
 0x008d,-1
 0x008e,-1
-//0x008f,-1
+//0x008f,0
 0x0090,7,npcclicked,2
 0x0091,22
 0x0092,28
@@ -111,7 +107,7 @@ packet_ver: 5
 0x00aa,7
 0x00ab,4,unequipitem,2
 0x00ac,7
-//0x00ad,-1
+//0x00ad,0
 0x00ae,-1
 0x00af,6
 0x00b0,8
@@ -196,7 +192,7 @@ packet_ver: 5
 0x00ff,10,replypartyinvite,2:6
 0x0100,2,leaveparty,0
 0x0101,6
-0x0102,6,partychangeoption,2
+0x0102,6,partychangeoption,2:4
 0x0103,30,removepartymember,2:6
 0x0104,79
 0x0105,31
@@ -328,7 +324,7 @@ packet_ver: 5
 0x0183,10,guilddelalliance,2:6
 0x0184,10
 0x0185,34
-//0x0186,-1
+//0x0186,0
 0x0187,6
 0x0188,8
 0x0189,4
@@ -396,7 +392,7 @@ packet_ver: 5
 0x01c7,2
 0x01c8,13
 0x01c9,97
-//0x01ca,-1
+//0x01ca,0
 0x01cb,9
 0x01cc,9
 0x01cd,30
@@ -461,8 +457,8 @@ packet_ver: 5
 0x0208,11,friendslistreply,2:6:10
 0x0209,36
 0x020a,10
-//0x020b,-1
-//0x020c,-1
+//0x020b,0
+//0x020c,0
 0x020d,-1
 
 //2004-07-05aSakexe
@@ -691,10 +687,10 @@ packet_ver: 15
 0x022c,64
 
 //2005-04-25aSakexe
-0x022d,5,hommenu,2:4
-0x0232,9,hommoveto,2:6
-0x0233,11,homattack,2:6:10
-0x0234,6,hommovetomaster,2
+0x022d,5,hommenu,4
+0x0232,9,hommoveto,6
+0x0233,11,homattack,0
+0x0234,6,hommovetomaster,0
 
 //2005-05-09aSakexe
 packet_ver: 16
@@ -735,7 +731,7 @@ packet_ver: 16
 0x022f,5
 0x0231,26,changehomunculusname,0
 0x023a,4
-0x023b,36,storagepassword,2:4:20
+0x023b,24,storagepassword,0
 0x023c,6
 
 //2005-06-22aSakexe
@@ -758,7 +754,7 @@ packet_ver: 17
 0x0113,33,useskilltopos,12:15:18:31
 0x0116,12,dropitem,3:10
 0x0190,24,actionrequest,11:23
-0x0216,-1
+0x0216,0
 0x023d,-1
 0x023e,4
 
@@ -792,11 +788,11 @@ packet_ver: 18
 0x0248,68
 0x0249,3
 0x024a,70
-0x024b,4,auctioncancelreg,0
-0x024c,8,auctionsetitem,0
+0x024b,4,auctioncancelreg,2
+0x024c,8,auctionsetitem,2:4
 0x024d,14
-0x024e,6,auctioncancel,0
-0x024f,10,auctionbid,0
+0x024e,6,auctioncancel,2
+0x024f,10,auctionbid,2:6
 0x0250,3
 0x0251,2
 0x0252,-1
@@ -824,7 +820,7 @@ packet_ver: 19
 0x0251,4
 
 //2005-08-08aSakexe
-0x024d,12,auctionregister,0
+0x024d,12,auctionregister,2:6:10
 0x024e,4
 
 //2005-08-17aSakexe
@@ -835,7 +831,7 @@ packet_ver: 19
 0x0240,-1
 0x0248,-1,mailsend,2:4:28:68
 0x0255,5
-0x0256,-1
+0x0256,0
 0x0257,8
 
 //2005-09-12bSakexe
@@ -851,11 +847,11 @@ packet_ver: 19
 //2005-10-13aSakexe
 0x007a,6
 0x0251,32
-0x025c,4,auctionbuysell,0
+0x025c,4,auctionbuysell,2
 
 //2005-10-17aSakexe
 0x007a,58
-0x025d,6,auctionclose,0
+0x025d,6,auctionclose,2
 0x025e,4
 
 //2005-10-24aSakexe
@@ -863,8 +859,7 @@ packet_ver: 19
 0x0260,6
 
 //2005-11-07aSakexe
-0x024e,6,auctioncancel,0
-0x0251,34,auctionsearch,0
+0x0251,34,auctionsearch,2:4:8:32
 
 //2006-01-09aSakexe
 0x0261,11
@@ -935,7 +930,7 @@ packet_ver: 20
 0x0285,6
 0x0286,4
 0x0287,-1
-0x0288,6
+0x0288,6,cashshopbuy,2:4
 0x0289,8
 0x028a,18
 0x028b,-1
@@ -958,8 +953,8 @@ packet_ver: 20
 0x029d,-1
 0x029e,11
 0x029f,3,mermenu,0
-0x02a0,-1
-0x02a1,-1
+0x02a0,0
+0x02a1,0
 0x02a2,8
 
 //2007-01-08aSakexe
@@ -986,8 +981,8 @@ packet_ver: 21
 
 //2007-01-29aSakexe
 0x029b,72
-0x02a3,-1
-0x02a4,-1
+0x02a3,0
+0x02a4,0
 0x02a5,8
 
 // 2007-02-05aSakexe
@@ -1107,8 +1102,8 @@ packet_ver: 22
 0x02ef,8
 
 //2008-03-18aSakexe
-0x02bf,-1
-0x02c0,-1
+0x02bf,0
+0x02c0,0
 0x02f0,10
 0x02f1,2,progressbar,0
 0x02f2,2
@@ -1292,7 +1287,7 @@ packet_ver: 23
 
 //2008-12-10aSakexe
 0x0442,-1
-0x0443,8,skillselectmenu,2:6
+0x0443,8
 
 //2009-01-14aSakexe
 0x043f,25
@@ -1387,7 +1382,7 @@ packet_ver: 25
 //0x0447,2
 
 //2009-06-03aRagexeRE
-0x07d7,8,partychangeoption,2:6:7
+0x07d7,8,partychangeoption,2:6
 0x07d8,8
 0x07d9,254
 0x07da,6,partychangeleader,2
@@ -1410,15 +1405,15 @@ packet_ver: 25
 //0x07e0,58
 
 //2009-07-15aRagexeRE
-0x07e1,15
+//0x07e1,15
 
 //2009-08-05aRagexeRE
-0x07e2,8
+//0x07e2,8
 
 //2009-08-18aRagexeRE
-0x07e3,6
-0x07e4,-1,itemlistwindowselected,2:4:8
-0x07e6,8
+//0x07e3,6
+//0x07e4,-1
+//0x07e6,8
 
 //2009-08-25aRagexeRE
 //0x07e6,28
@@ -1426,14 +1421,14 @@ packet_ver: 25
 
 //2009-09-22aRagexeRE
 0x07e5,8
-0x07e6,8
+//0x07e6,8
 0x07e7,32
 0x07e8,-1
 0x07e9,5
 
 //2009-09-29aRagexeRE
 //0x07ea,2
-//0x07eb,-1
+//0x07eb,0
 //0x07ec,6
 //0x07ed,8
 //0x07ee,6
@@ -1469,11 +1464,11 @@ packet_ver: 25
 //2009-12-01aRagexeRE
 //0x07fc,10
 //0x07fd,-1
-0x07fe,26
+//0x07fe,26
 //0x07ff,-1
 
 //2009-12-15aRagexeRE
-0x0800,-1
+//0x0800,-1
 //0x0801,-1
 
 //2009-12-22aRagexeRE
@@ -1533,8 +1528,8 @@ packet_ver: 25
 //0x081A,4
 //0x081B,4
 //0x081C,6
-0x081d,22
-0x081e,8
+//0x081D,22
+//0x081E,8
 
 //2010-03-23aRagexeRE
 //0x081F,-1
@@ -1544,7 +1539,7 @@ packet_ver: 25
 
 //2010-04-13aRagexeRE
 //0x081A,10
-0x0820,11
+//0x0820,11
 //0x0821,2
 //0x0822,9
 //0x0823,-1
@@ -1631,407 +1626,65 @@ packet_ver: 26
 0x0858,-1
 0x0859,-1
 
-//2011-10-05aRagexeRE
 packet_ver: 27
-0x0364,5,walktoxy,2
-0x0817,6,ticksend,2
-0x0366,5,changedir,2:4
-0x0815,6,takeitem,2
-0x0885,6,dropitem,2:4
-0x0893,8,movetokafra,2:4
-0x0897,8,movefromkafra,2:4
-0x0369,10,useskilltopos,2:4:6:8
-0x08ad,90,useskilltoposinfo,2:4:6:8:10
-0x088a,6,getcharnamerequest,2
-0x0838,6,solvecharname,2
-0x0439,8,useitem,2:4
+0x022d,19,wanttoconnection,2:6:10:14:18
+0x0437,5,walktoxy,2
+0x035f,6,ticksend,2
+0x0893,5,changedir,2:4
+0x07e4,6,takeitem,2
+0x0362,6,dropitem,2:4
+0x07ec,8,movetokafra,2:4
+0x0364,8,movefromkafra,2:4
+0x0202,10,useskilltopos,2:4:6:8
+0x0366,90,useskilltoposinfo,2:4:6:8:10
+0x08ad,6,getcharnamerequest,2
+0x0368,6,solvecharname,2
+0x0369,7,actionrequest,2:6
+0x083c,10,useskilltoid,2:4:6
 
-// 2011-11-02aRagexe
+// Desconhecido
+0x08C7,-1
+0x08C8,34
+0x08C9,2
+0x08CA,-1
+0x08CB,-1
+0x08CC,109
+0x08CD,2
+0x08CE,10
+0x08CF,9
+0x08D0,7
+0x08D1,10
+0x08D2,10
+0x08D3,14
+0x08D4,-1
+
 packet_ver: 28
-0x0436,26,friendslistadd,2
-0x0898,5,hommenu,4
-0x0281,36,storagepassword,0
-0x088d,26,partyinvite2,2
-0x083c,19,wanttoconnection,2:6:10:14:18
-0x08aa,7,actionrequest,2:6
-0x02c4,10,useskilltoid,2:4:6
-0x0811,-1,itemlistwindowselected,2:4:8
-0x890,8
-0x08a5,18,bookingregreq,2:4:6
-0x0835,-1,reqopenbuyingstore,2:4:8:9:89
-0x089b,2,reqclosebuyingstore,0
-0x08a1,6,reqclickbuyingstore,2
-0x089e,-1,reqtradebuyingstore,2:4:8:12
-0x08ab,-1,searchstoreinfo,2:4:5:9:13:14:15
-0x088b,2,searchstoreinfonextpage,0
-0x08a2,12,searchstoreinfolistitemclick,2:6:10
 
-// Pacotes do bRO(2012-02-02)
-// Descomente todos e comente os anteriores deste packet_ver para usa-lo
-//0x0930,19,wanttoconnection,2:6:10:14:18
-//0x0202,8,movetokafra,2:4
-//0x0232,9,hommoveto,2:6
-//0x089A,5,walktoxy,2
-//0x091A,10,useskilltopos,2:4:6:8
-//0x0926,10,useskilltoid,2:4:6:8
-//0x088C,7,actionrequest,2:6
-//0x085E,6,getcharnamerequest,2
-//0x0961,8,movefromkafra,2:4
-//0x0952,6,dropitem,2:4
-//0x094B,5,changedir,2:4
-//0x093D,5,hommenu,4
-//0x0869,6,takeitem,2
-//0x0801,-1,reqtradebuyingstore,2:4:8:12
-//0x0923,6,ticksend,2
-//0x095F,26,partyinvite2,2
-//0x008c,-1,globalmessage,2:4
-//0x00f7,2,closekafra,0
-//0x00a7,8,useitem,2:6
-//0x087f,36,storagepassword,2:4:20
-//0x0288,6,cashshopbuy,2:4
-//0x190,90,useskilltoposinfo,2:4:6:8:10
-//0x193,6,solvecharname,2
-//0x969,26
-//0x876,4
-//0x8cd,10
-//0x8b,23
-//0x23d,6
-//0x24e,6,auctioncancel,2
-//0x275,37
-//0x276,-1
-//0x289,8
-//0x445,6
-//0x2e2,8
-//0x2e3,10
-//0x2e4,6
-//0x2e5,5
-//0x3dd,18
-//0x3de,18
-//0x447,2
-//0x7db,8
-//0x7dc,6
-//0x7dd,54
-//0x7de,30
-//0x7df,54
-//0x7e0,58
-//0x967,-1
-//0x7e5,4
-//0x7ea,2
-//0x7eb,-1
-//0x897,8
-//0x7ed,10
-//0x7ee,6
-//0x7ef,8
-//0x7f0,6
-//0x7f1,18
-//0x7f2,8
-//0x7f3,6
-//0x7f4,3
-//0x7fc,10
-//0x7fd,-1
-//0x7ff,-1
-//0x800,-1
-//0x8ab,18
-//0x80c,2
-//0x80d,3
-//0x363,-1
-//0x22d,2
-//0x92c,6
-//0x87b,-1
-//0x81f,-1
-//0x821,2
-//0x822,9
-//0x823,-1
-//0x825,-1
-//0x826,4
-//0x8ad,-1
-//0x885,2
-//0x91c,12
-//0x83e,26
-//0x840,-1
-//0x841,4
-//0x827,6
-//0x828,14
-//0x829,12
-//0x82a,10
-//0x82b,6
-//0x82c,10
-//0x844,2
-//0x845,6
-//0x846,4
-//0x847,-1
-//0x848,-1
-//0x849,12
-//0x84a,2
-//0x84b,19
-//0x84c,10
-//0x84d,10
-//0x84e,5
-//0x84f,6
-//0x850,7
-//0x855,6
-//0x851,-1
-//0x852,2
-//0x853,-1
-//0x854,-1
-//0x361,6
-//0x878,2
-//0x8a0,2
-//0x927,2
-//0x94c,2
-//0x922,2
-//0x95a,2
-//0x883,2
-//0x894,2
-//0x91b,2
-//0x89c,2
-//0x94a,2
-//0x7e4,2
-//0x964,2
-//0x941,2
-//0x919,2
-//0x87c,2
-//0x932,2
-//0x951,2
-//0x948,2
-//0x91d,2
-//0x921,2
-//0x2c4,2
-//0x367,2
-//0x939,2
-//0x85b,2
-//0x924,2
-//0x91e,2
-//0x91f,2
-//0x93b,2
-//0x8a8,2
-//0x360,2
-//0x89e,2
-//0x899,2
-//0x920,2
-//0x437,2
-//0x8a3,2
-//0x862,2
-//0x94f,2
-//0x861,2
-//0x958,2
-//0x962,2
-//0x960,2
-//0x8ac,2
-//0x364,2
-//0x8a5,2
-//0x880,2
-//0x875,2
-//0x864,2
-//0x95e,2
-//0x369,2
-//0x966,2
-//0x87d,2
-//0x931,2
-//0x946,2
-//0x93c,2
-//0x917,2
-//0x88d,2
-//0x35f,2
-//0x881,2
-//0x92f,2
-//0x85c,2
-//0x934,2
-//0x925,2
-//0x95c,2
-//0x96a,2
-//0x959,2
-//0x86e,2
-//0x281,2
-//0x87e,2
-//0x94e,2
-//0x88a,2
-//0x872,2
-//0x86a,2
-//0x942,2
-//0x935,2
-//0x873,2
-//0x945,2
-//0x86b,2
-//0x947,2
-//0x817,2
-//0x877,2
-//0x802,2
-//0x895,2
-//0x93e,2
-//0x8b1,-1
-//0x82d,-1
-//0x8b2,-1
-//0x8af,10
-//0x8b0,17
-//0x8b3,-1
-//0x8b4,2
-//0x8b5,6
-//0x8b6,3
-//0x2f4,3
-//0x2f5,7
-//0x2f6,7
-//0x8b8,10
-//0x8b9,12
-//0x8ba,10
-//0x8bb,8
-//0x8bc,10
-//0x8bd,8
-//0x8be,14
-//0x8bf,8
-//0x8c3,10
-//0x8c4,8
-//0x8c5,6
-//0x8c6,4
-//0x8c0,-1
-//0x8c1,2
-//0x8c2,2
-//0x8ce,2
-//0x8cf,10
-//0x8d0,9
-//0x8d1,7
-//0x8d3,10
-//0x8d4,8
-//0x8d5,-1
-//0x8d6,6
-//0x8d7,28
-//0x8d8,27
-//0x8d9,30
-//0x8da,26
-//0x8db,27
-//0x8dc,26
-//0x8dd,27
-//0x8de,27
-//0x8df,50
-//0x8e0,51
-//0x8e1,51
-//0x8e2,25
-//0x8e3,118
-//0x8e4,6
-//0x8e5,41
-//0x8e6,4
-//0x8e7,10
-//0x8e8,-1
-//0x8e9,2
-//0x8ea,4
-//0x8eb,39
-//0x8ec,73
-//0x8ed,43
-//0x8ee,6
-//0x8ef,6
-//0x8f0,6
-//0x8f1,6
-//0x8f2,36
-//0x8f3,-1
-//0x8f4,6
-//0x8f5,-1
-//0x8f6,22
-//0x8f7,3
-//0x8f8,7
-//0x8f9,6
-//0x8fa,6
-//0x8fb,6
-//0x909,6
-//0x90b,30
-//0x90c,30
-//0x8fc,30
-//0x8fd,6
-//0x8fe,-1
-//0x8ff,24
-//0x900,-1
-//0x901,-1
-//0x902,-1
-//0x903,-1
-//0x904,-1
-//0x905,-1
-//0x906,-1
-//0x907,5
-//0x908,5
-//0x90a,26
-//0x90d,-1
-//0x90e,2
-//0x896,2
-//0x92d,2
-//0x870,2
-//0x871,2
-//0x368,2
-//0x89d,2
-//0x8a7,2
-//0x86d,2
-//0x866,2
-//0x954,2
-//0x436,2
-//0x93a,2
-//0x867,2
-//0x936,2
-//0x92b,2
-//0x968,2
-//0x884,2
-//0x929,2
-//0x362,2
-//0x893,2
-//0x87a,2
-//0x8a2,2
-//0x940,2
-//0x965,2
-//0x944,2
-//0x88e,2
-//0x88f,2
-//0x8a6,2
-//0x957,2
-//0x949,2
-//0x85d,2
-//0x963,2
-//0x86c,2
-//0x882,2
-//0x933,2
-//0x95b,2
-//0x892,2
-//0x23b,2
-//0x89b,2
-//0x955,2
-//0x886,2
-//0x8aa,2
-//0x819,2
-//0x438,2
-//0x874,2
-//0x879,2
-//0x85f,2
-//0x938,2
-//0x8a9,2
-//0x890,2
-//0x7ec,2
-//0x94d,2
-//0x918,2
-//0x88b,2
-//0x92a,2
-//0x868,2
-//0x891,2
-//0x89f,2
-//0x860,2
-//0x8a4,2
-//0x950,2
-//0x887,2
-//0x956,2
-//0x889,2
-//0x928,2
-//0x937,2
-//0x95d,2
-//0x811,2
-//0x898,2
-//0x85a,2
-//0x888,2
-//0x943,2
-//0x865,2
-//0x92e,2
-//0x835,2
-//0x863,2
-//0x953,2
-//0x86f,2
-//0x365,2
-//0x83c,2
-//0x93f,2
-//0x8a1,2
+//2011-11-02
+//0x083c,19,wanttoconnection,2:6:10:14:18
+//0x088a,6,getcharnamerequest,2
+//0x0817,6,ticksend,2
+//0x0366,5,changedir,2:4
+//0x0364,5,walktoxy,2
+//0x08aa,7,actionrequest,2:6
+//0x02c4,10,useskilltoid,2:4:6
+//0x0369,10,useskilltopos,2:4:6:8
+//0x08ad,90,useskilltoposinfo,2:4:6:8:10
+//0x0885,6,dropitem,2:4
+//0x0815,6,takeitem,2
+
+//2011-11-22
+0x0835,19,wanttoconnection,2:6:10:14:18
+0x0898,6,getcharnamerequest,2
+0x0899,6,ticksend,2
+0x0896,5,changedir,2:4
+0x0892,5,walktoxy,2
+0x022d,7,actionrequest,2:6
+0x08a1,10,useskilltoid,2:4:6
+0x08ad,10,useskilltopos,2:4:6:8
+0x0363,90,useskilltoposinfo,2:4:6:8:10
+0x0436,6,dropitem,2:4
+0x0893,6,takeitem,2
 
 //Add new packets here
-//packet_ver: 27
+//packet_ver: 29

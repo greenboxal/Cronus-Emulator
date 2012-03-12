@@ -272,7 +272,7 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
-ac_unique_file="rAthena"
+ac_unique_file="Cronus"
 ac_unique_file="src/common/cbasetypes.h"
 # Factoring default headers for most tests.
 ac_includes_default="\

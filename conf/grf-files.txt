@@ -1,12 +1,24 @@
-//-----------------------------------------
+//--------------------------------------------------------------
+// _________                                    
+// \_   ___ \_______  ____   ____  __ __  ______
+// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
+// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
+//  \______  /|__|   \____/|___|  /____//____  >
+//         \/                   \/           \/  
+//--------------------------------------------------------------
+// Traduzido para Português por Mara
+//--------------------------------------------------------------
+
+//--------------------------------------------------------------
 // GRF List
-//-----------------------------------------
-// grf: C:\path\to\RO\data.grf
-// You may add more in this format
-// grf: <data file path>
+//--------------------------------------------------------------
+// Diretório para a sua 'data.grf'
+// ex.: -> grf: C:\Arquivos de Programas\Gravity\RO\data.grf
+// Você pode adicionar mais caso precise
+//grf: <caminho para a pasta data>
 
-//------ Others ---------------------------
-
-// Data Directory (without the actual data\ though)
-// the below example would use C:\path\to\RO\data\
+//------ Outros ------------------------------------------------
+// Diretório da pasta data (sem colocá-la no comando data_dir)
+// ex. -> data_dir: C:\Arquivos de Programas\Gravity\RO\
+// A pasta data tem que estar em \RO\, no exemplo.
 //data_dir: C:\path\to\RO\

@@ -10,21 +10,15 @@ C_SRV=char-server_sql
 M_SRV=map-server_sql
 
 print_start() {
-#    more << EOF
 echo "Iniciando o emulador Cronus..."
 echo "            (c) 2003 Athena Project"
 echo "              modified by shazeya@syafi.com"
 echo "              traduzido por GreenBox"
 echo ""
-#echo "Debug informations will appear,"
-#echo "since this is a test release."
-#echo ""
 echo "Verificando..."
-#EOF
 }
 
 check_files() {
-
     for i in ${L_SRV} ${C_SRV} ${M_SRV}
     do
         if [ ! -f ./$i ]; then
@@ -34,10 +28,8 @@ check_files() {
         fi
     done
 
-#    more << EOF
-echo "Verificação completa!"
-echo "Iniciando o emulador..."
-#EOF
+    echo "Verificação completa!"
+    echo "Iniciando o emulador..."
 }
     
 
@@ -51,15 +43,15 @@ case $1 in
         exec ./${M_SRV}&
 
         echo "Cronus iniciado com sucesso!"
-;;
+    ;;
     'stop')
         ps ax | grep -E "${L_SRV}|${C_SRV}|${M_SRV}" | awk '{print $1}' | xargs kill
-;;
+    ;;
     'restart')
         $0 stop
         $0 start
-;;
+    ;;
     *)
         echo "Usage: athena-start { start | stop | restart }"
-;;
+    ;;
 esac

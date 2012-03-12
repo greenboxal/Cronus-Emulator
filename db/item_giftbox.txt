@@ -1,7 +1,16 @@
-// Gift Box Obtainable Items Database
-//
-// Structure of Database:
-// GroupID,ItemID,Rate
+//--------------------------------------------------------------
+// _________                                    
+// \_   ___ \_______  ____   ____  __ __  ______
+// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
+// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
+//  \______  /|__|   \____/|___|  /____//____  >
+//         \/                   \/           \/  
+//--------------------------------------------------------------
+// Banco de Dados de Itens Adquiríveis pela Caixa de Presente
+//--------------------------------------------------------------
+// Estrutura do banco de dados:
+// GroupID,ItemID,Chance
+//--------------------------------------------------------------
 
 // GiftBox
 4,501,1	// Red Potion
@@ -80,6 +89,7 @@
 4,1558,1	// Girl's Diary
 4,4005,1	// Santa Poring Card
 4,7034,1	// Red Stocking
+
 // GiftBox_1
 28,501,1	// Red Potion
 28,502,1	// Orange Potion
@@ -157,6 +167,7 @@
 28,1558,1	// Girl's Diary
 28,4005,1	// Santa Poring Card
 28,7034,1	// Red Stocking
+
 // GiftBox_2
 29,501,1	// Red Potion
 29,502,1	// Orange Potion
@@ -234,6 +245,7 @@
 29,1558,1	// Girl's Diary
 29,4005,1	// Santa Poring Card
 29,7034,1	// Red Stocking
+
 // Gift_Box3
 30,501,1	// Red Potion
 30,502,1	// Orange Potion
@@ -311,6 +323,7 @@
 30,1558,1	// Girl's Diary
 30,4005,1	// Santa Poring Card
 30,7034,1	// Red Stocking
+
 // GiftBox_4
 31,501,1	// Red Potion
 31,502,1	// Orange Potion
@@ -388,6 +401,7 @@
 31,1558,1	// Girl's Diary
 31,4005,1	// Santa Poring Card
 31,7034,1	// Red Stocking
+
 // GiftBox_China
 34,501,1	// Red Potion
 34,502,1	// Orange Potion

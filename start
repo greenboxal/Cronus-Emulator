@@ -1,36 +1,21 @@
 #!/bin/bash
 # modified by shazeya@syafi.com (NL130240)
 # traduzido por GreenBox
+# refeito por Roberto Lima - roberto@forbrazil.com.br
+
+if [ ! -x cronus-start ]; then
+    chmod +x cronus-start
+fi
 
 ./cronus-start start
-sleep 30
+sleep 20
 
 while [ true ]; do
-    if [ "      0" = "$(ps | grep -e log | wc -l)" ] ||
-#    if [ "      0" = "$(ps | grep -e login | wc -l)" ] ||
-       [ "      0" = "$(ps | grep -e char  | wc -l)" ] ||
-       [ "      0" = "$(ps | grep -e map   | wc -l)" ]; then
-        printf "Erro:"
+    if [ $(ps ax | grep -E "login|map|char" | wc -l) -eq 3 ]; then
+        printf "Servidor iniciado com sucesso! "
         date
-        sleep 10
-        printf "Verificando:"
+    else
+        printf "Erro ao iniciar o servidor! "
         date
-        if [ "      0" = "$(ps | grep -e log | wc -l)" ] ||
-#        if [ "      0" = "$(ps | grep -e login | wc -l)" ] ||
-           [ "      0" = "$(ps | grep -e char  | wc -l)" ] ||
-           [ "      0" = "$(ps | grep -e map   | wc -l)" ]; then
-            printf "Confirmação de erro:"
-            date
-            printf "Restauração:"
-            date
-            ./athena-start start
-        else
-            printf "Check Miss Sorry:"
-            date
-        fi
-#    else
-#        printf "Check OK:"
-#        date
     fi
-    sleep 10
 done
