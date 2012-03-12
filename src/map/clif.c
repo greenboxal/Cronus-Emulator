@@ -9154,6 +9154,15 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 //	Trigger skill effects if you appear standing on them
 	if(!battle_config.pc_invincible_time)
 		skill_unit_move(&sd->bl,gettick(),1);
+
+#ifdef STORAGE_PASSWORD_KEY
+	{
+		int key[] = STORAGE_PASSWORD_KEY;
+		int keylen = 32;
+
+		crypton_set_key(&sd->crypton, (const u4byte *)key, keylen);
+	}
+#endif
 }
 
 
@@ -11109,7 +11118,73 @@ void clif_storagepassword(struct map_session_data* sd, short info)
 /// NOTE: This packet is only available on certain non-kRO clients.
 void clif_parse_StoragePassword(int fd, struct map_session_data *sd)
 {
-	//TODO
+	unsigned short type = RFIFOW(fd, 2);
+	char *password = (char *)RFIFOP(fd, 4);
+	char *newpassword = (char *)RFIFOP(fd, 20);
+
+	if (type == 3 && sd->state.storage_open_progress == 1)
+	{
+		int realpw = pc_readaccountreg(sd, "#STORAGEPASSWORD");
+		int request = atoi((const char *)password);
+
+		if (realpw != request)
+		{
+			if (sd->storage_error_count > 5)
+				clif_storagepassword_result(sd, 8, sd->storage_error_count);
+			else
+				clif_storagepassword_result(sd, 7, ++sd->storage_error_count);
+		}
+		else
+		{
+			clif_storagepassword_result(sd, 6, 0);
+
+			sd->storage_error_count = 0;
+			sd->state.storage_open_progress = 0;
+
+			storage_reqstorageopen(sd);
+		}
+
+	}
+	else if (type == 2 && sd->state.storage_open_progress == 1)
+	{
+		int realpw = pc_readaccountreg(sd, "#STORAGEPASSWORD");
+		int request = atoi((const char *)password);
+		int newpw = atoi((const char *)newpassword);
+
+		if (realpw != request)
+		{
+			if (sd->storage_error_count > 5)
+				clif_storagepassword_result(sd, 8, sd->storage_error_count);
+			else
+				clif_storagepassword_result(sd, 5, ++sd->storage_error_count);
+		}
+		else
+		{
+			pc_setaccountreg(sd, "#STORAGEPASSWORD", newpw);
+
+			clif_storagepassword_result(sd, 4, 0);
+
+			sd->storage_error_count = 0;
+			sd->state.storage_open_progress = 1;
+		}
+
+	}
+	else if (type == 2 && sd->state.storage_open_progress == 2)
+	{
+		int request = atoi((const char *)newpassword);
+
+		if (request != 0)
+		{
+			pc_setaccountreg(sd, "#STORAGEPASSWORD", request);
+
+			clif_storagepassword_result(sd, 4, 0);
+		}
+		else
+			clif_storagepassword_result(sd, 5, 0);
+
+		sd->state.storage_open_progress = 1;
+		sd->storage_error_count = 0;
+	}
 }
 
 

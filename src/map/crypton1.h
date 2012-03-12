@@ -9,6 +9,11 @@ typedef signed char     s1byte; /* an 8 bit signed character type   */
 typedef signed short    s2byte; /* a 16 bit signed integer type     */
 typedef signed long     s4byte; /* a 32 bit signed integer type     */
 
+typedef struct
+{
+	u4byte l_key[104];
+} crypton_context;
+
 /* 2. Standard interface for AES cryptographic routines             */
 /* These are all based on 32 bit unsigned values and will therefore */
 /* require endian conversions for big-endian architectures          */
@@ -16,9 +21,9 @@ typedef signed long     s4byte; /* a 32 bit signed integer type     */
 extern "C"
 {
 #endif
-    u4byte *crypton_set_key(const u4byte in_key[], const u4byte key_len);
-    void crypton_encrypt(const u4byte in_blk[4], u4byte out_blk[4]);
-    void crypton_decrypt(const u4byte in_blk[4], u4byte out_blk[4]);
+    u4byte *crypton_set_key(crypton_context *ctx, const u4byte in_key[], const u4byte key_len);
+    void crypton_encrypt(crypton_context *ctx, const u4byte in_blk[4], u4byte out_blk[4]);
+    void crypton_decrypt(crypton_context *ctx, const u4byte in_blk[4], u4byte out_blk[4]);
 #ifdef  __cplusplus
 };
 #endif

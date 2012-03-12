@@ -19,6 +19,10 @@
 #include "mob.h"
 #include "log.h"
 
+#ifdef STORAGE_PASSWORD_KEY
+#include "crypton1.h"
+#endif
+
 #define MAX_PC_BONUS 10
 #define MAX_PC_SKILL_REQUIRE 5
 #define MAX_PC_FEELHATE 3
@@ -145,6 +149,7 @@ struct map_session_data {
 		unsigned short autobonus; //flag to indicate if an autobonus is activated. [Inkfish]
 		struct guild *gmaster_flag;
 		unsigned int prevend : 1;//used to flag wheather you've spent 40sp to open the vending or not.
+		unsigned int storage_open_progress : 4;
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -468,6 +473,12 @@ struct map_session_data {
 	const char* delunit_prevfile;
 	int delunit_prevline;
 
+#ifdef STORAGE_PASSWORD
+	int storage_error_count;
+#ifdef STORAGE_PASSWORD_KEY
+	crypton_context crypton;
+#endif
+#endif
 };
 
 //Update this max as necessary. 55 is the value needed for Super Baby currently

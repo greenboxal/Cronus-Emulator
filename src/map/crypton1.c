@@ -96,10 +96,6 @@ u4byte  tab_gen = 0;
 u1byte  s_box[2][256];
 u4byte  s_tab[4][256];
 
-u4byte l_key[104];
-u4byte *e_key = l_key + 52;
-u4byte *d_key = l_key;
-
 void gen_tab(void)
 {   
 	u4byte  i, xl, xr, yl, yr;
@@ -122,7 +118,7 @@ void gen_tab(void)
 
     }
 
-};
+}
 
 /* initialise the key schedule from the user supplied key   */
 u4byte  kp[4] = { 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f };
@@ -140,9 +136,12 @@ u4byte  kq[4] = { 0x9b05688c, 0x1f83d9ab, 0x5be0cd19, 0xcbbb9d5d };
     e_key[4 * n + 10] = rc ^ e_key[4 * n + 2];      \
     e_key[4 * n + 11] = rotl(e_key[4 * n + 3], r1)
 
-u4byte *crypton_set_key(const u4byte in_key[], const u4byte key_len)
+u4byte *crypton_set_key(crypton_context *ctx, const u4byte in_key[], const u4byte key_len)
 {   
 	u4byte  i, rc, t0, t1, tmp[4];
+	
+	u4byte *e_key = ctx->l_key + 52;
+	u4byte *d_key = ctx->l_key;
 
     if (!tab_gen)
     {
@@ -212,9 +211,8 @@ u4byte *crypton_set_key(const u4byte in_key[], const u4byte key_len)
     phi1(d_key + 48, d_key + 48);
     phi1(e_key + 48, e_key + 48);
 
-    return l_key;
-
-};
+    return ctx->l_key;
+}
 
 /* encrypt a block of text  */
 #define fr0(i,k)                                    \
@@ -237,9 +235,12 @@ u4byte *crypton_set_key(const u4byte in_key[], const u4byte key_len)
     fr1(0,(kp)[0]); fr1(1,(kp)[1]); \
     fr1(2,(kp)[2]); fr1(3,(kp)[3])
 
-void crypton_encrypt(const u4byte in_blk[4], u4byte out_blk[4])
+void crypton_encrypt(crypton_context *ctx, const u4byte in_blk[4], u4byte out_blk[4])
 {   
 	u4byte  b0[4], b1[4];
+	
+	u4byte *e_key = ctx->l_key + 52;
+	u4byte *d_key = ctx->l_key;
 
     b0[0] = in_blk[0] ^ e_key[0];
     b0[1] = in_blk[1] ^ e_key[1];
@@ -262,12 +263,15 @@ void crypton_encrypt(const u4byte in_blk[4], u4byte out_blk[4])
     out_blk[1] = b0[1] ^ e_key[49];
     out_blk[2] = b0[2] ^ e_key[50]; 
     out_blk[3] = b0[3] ^ e_key[51];
-};
+}
 
 /* decrypt a block of text  */
-void crypton_decrypt(const u4byte in_blk[4], u4byte out_blk[4])
+void crypton_decrypt(crypton_context *ctx, const u4byte in_blk[4], u4byte out_blk[4])
 {   
 	u4byte  b0[4], b1[4];
+	
+	u4byte *e_key = ctx->l_key + 52;
+	u4byte *d_key = ctx->l_key;
 
     b0[0] = in_blk[0] ^ d_key[0];
     b0[1] = in_blk[1] ^ d_key[1];
@@ -290,4 +294,4 @@ void crypton_decrypt(const u4byte in_blk[4], u4byte out_blk[4])
     out_blk[1] = b0[1] ^ d_key[49];
     out_blk[2] = b0[2] ^ d_key[50];
     out_blk[3] = b0[3] ^ d_key[51];
-};
+}

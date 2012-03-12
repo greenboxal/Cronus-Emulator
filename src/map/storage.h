@@ -11,6 +11,12 @@ struct item;
 //#include "map.h"
 struct map_session_data;
 
+#ifdef STORAGE_PASSWORD
+int storage_reqstorageopen(struct map_session_data *sd);
+#else
+#define storage_reqstorageopen storage_storageopen
+#endif
+
 int storage_delitem(struct map_session_data* sd, int n, int amount);
 int storage_storageopen(struct map_session_data *sd);
 int storage_storageadd(struct map_session_data *sd,int index,int amount);

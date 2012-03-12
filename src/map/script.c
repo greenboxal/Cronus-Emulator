@@ -7743,7 +7743,7 @@ BUILDIN_FUNC(openstorage)
 	if( sd == NULL )
 		return 0;
 
-	storage_storageopen(sd);
+	storage_reqstorageopen(sd);
 	return 0;
 }
 
@@ -15870,8 +15870,6 @@ BUILDIN_FUNC(is_function) {
  * get_revision() -> retrieves the current svn revision (if available)
  **/
 BUILDIN_FUNC(get_revision) {
-	const char * revision;
-
 	script_pushconststr(st,"Cronus-Emulator");
 
 	return 0;

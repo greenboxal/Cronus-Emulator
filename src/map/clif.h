@@ -403,6 +403,8 @@ void clif_updatestorageamount(struct map_session_data* sd, int amount, int max_a
 void clif_storageitemadded(struct map_session_data* sd, struct item* i, int index, int amount);
 void clif_storageitemremoved(struct map_session_data* sd, int index, int amount);
 void clif_storageclose(struct map_session_data* sd);
+void clif_storagepassword(struct map_session_data* sd, short info);
+void clif_storagepassword_result(struct map_session_data* sd, short result, short error_count);
 
 int clif_insight(struct block_list *bl,va_list ap);	// map_forallinmovearea callback
 int clif_outsight(struct block_list *bl,va_list ap);	// map_forallinmovearea callback

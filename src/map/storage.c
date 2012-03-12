@@ -83,6 +83,41 @@ void do_reconnect_storage(void)
 	guild_storage_db->foreach(guild_storage_db, storage_reconnect_sub);
 }
 
+#ifdef STORAGE_PASSWORD
+int storage_reqstorageopen(struct map_session_data *sd)
+{
+	int curpw;
+
+	nullpo_ret(sd);
+	
+	if	(sd->state.storage_flag)
+		return 1;
+
+	curpw = pc_readaccountreg(sd, "#STORAGEPASSWORD");
+	if (curpw == 0)
+	{
+		sd->state.storage_open_progress = 2;
+
+		clif_storagepassword(sd, 0);
+	}
+	else
+	{
+		if (sd->storage_error_count > 5)
+		{
+			clif_storagepassword(sd, 8);
+		}
+		else
+		{
+			sd->state.storage_open_progress = 1;
+
+			clif_storagepassword(sd, 1);
+		}
+	}
+
+	return 0;
+}
+#endif
+
 /*==========================================
  * Opens a storage. Returns:
  * 0 - success

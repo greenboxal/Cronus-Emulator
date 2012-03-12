@@ -818,7 +818,7 @@ ACMD_FUNC(storage)
 	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.storage_flag)
 		return -1;
 
-	if (storage_storageopen(sd) == 1)
+	if (storage_reqstorageopen(sd) == 1)
 	{	//Already open.
 		clif_displaymessage(fd, msg_txt(250));
 		return -1;
@@ -5254,7 +5254,7 @@ ACMD_FUNC(storeall)
 
 	if (sd->state.storage_flag != 1)
   	{	//Open storage.
-		if( storage_storageopen(sd) == 1 ) {
+		if( storage_reqstorageopen(sd) == 1 ) {
 			clif_displaymessage(fd, "You can't open the storage currently.");
 			return -1;
 		}
