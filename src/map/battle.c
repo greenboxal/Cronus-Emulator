@@ -397,12 +397,11 @@ int battle_calc_damage(struct block_list *src,struct block_list *bl,struct Damag
 				} else
 					damage -= group->val2;
 				skill_delunitgroup(group);
-			#else
+			#endif//Na renovação a habilidade tambem pode ser cancelada pelo numero de hits[Sicks]
 				if (--group->val2<=0)
 					skill_delunitgroup(group);
 				d->dmg_lv = ATK_BLOCK;
 				return 0;
-			#endif
 			}
 			status_change_end(bl, SC_SAFETYWALL, INVALID_TIMER);
 		}
@@ -3005,24 +3004,26 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 
 				switch(skill_num){
 					case MG_NAPALMBEAT:
-					case MG_FIREBALL:
 						skillratio += skill_lv*10-30;
+					case MG_FIREBALL:
+						#ifdef REMODE
+						skillratio += 40+20*skill_lv;
+						#else
+						skillratio += skill_lv*10-30;
+						#endif
 						break;
-					case MG_SOULSTRIKE:
+						case MG_SOULSTRIKE:
 						if (battle_check_undead(tstatus->race,tstatus->def_ele))
 							skillratio += 5*skill_lv;
 						break;
 					case MG_FIREWALL:
 						skillratio -= 50;
 						break;
-				/**
-				 * in Renewal Thunder Storm boost is 100% (in pre-re, 80%)
-				 **/
-				#if isOFF(REMODE)
+						#ifdef REMODE
 					case MG_THUNDERSTORM:
 						skillratio -= 20;
 						break;
-				#endif
+						#endif
 					case MG_FROSTDIVER:
 						skillratio += 10*skill_lv;
 						break;
