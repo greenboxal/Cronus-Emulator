@@ -1,34 +1,19 @@
-//--------------------------------------------------------------
-// _________                                    
-// \_   ___ \_______  ____   ____  __ __  ______
-// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
-// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
-//  \______  /|__|   \____/|___|  /____//____  >
-//         \/                   \/           \/  
-//--------------------------------------------------------------
-// Banco de Dados de Influências Externas na Conjuração e Delay das Habilidades
-//--------------------------------------------------------------
-// Estrutura do banco de dados:
-// SkillID,Cast,Delay (optional)
+// <Skill id>,<Cast>,<Delay (optional)>
 //
-// 01. SkillID		ID da habilidade.
-// 02. Cast
-//	0 - qualquer coisa afeta o tempo de conjuração da habilidade
-//	1 - a conjuração não é afetada por destreza
-//	2 - a conjuração não é afetada por magias/bragi
-//	4 - a conjuração não é afetada por bônus de itens/cartas/equip.
+// Cast:  0 - everything affects the skill's cast time
+//        1 - skill's cast time is not affected by dex
+//        2 - skill's cast time is not affected by statuses (Suffragium, etc)
+//        4 - skill's cast time is not affected by item bonuses (equip, cards)
 //
-// 03. Delay
-//	0 - qualquer coisa afeta o delay da habilidade
-//	1 - o delay da habilidade não é afetado por destreza
-//	2 - o delay da habilidade não é afetado por magias/bragi
-//	4 - o delay da habilidade não é afetado por bônus de itens/cartas/equip.
+// Delay: 0 - everything affects the skill's delay
+//        1 - skill's delay is not affected by dex
+//        2 - skill's delay is not affected by Magic Strings / Bragi
+//        4 - skill's delay is not affected by item bonuses (equip, cards)
 //
-// NOTA: Os valores são em bit, some para combinar diferentes efeitos.
-// NOTA: Configurando o Delay para '1' só fara sentido se delay_dependon_dex estiver habilitado.
-//--------------------------------------------------------------
+// Note: Values are bit fields, add them up to combine their effects.
+// Note: Delay setting '1' only makes sense when delay_dependon_dex is enabled.
+// Example: 46,1,1 = Double Strafe's cast time and delay is not affected by dex.
 
-// Hablidades Comuns
 136,0,2	//AS_SONICBLOW
 263,0,2	//MO_TRIPLEATTACK
 272,0,2	//MO_CHAINCOMBO
@@ -50,12 +35,15 @@
 498,1	//AM_TWILIGHT3
 512,3	//GS_TRACKING
 1014,1	//PR_REDEMPTIO
+2534,7,7	//RETURN_TO_ELDICASTES
+2536,7,7	//ALL_GUARDIAN_RECALL
+//2537,0,7	//ALL_ODINS_POWER
 10010,3	//GD_BATTLEORDER
 10011,3	//GD_REGENERATION
 10012,6	//GD_RESTORE
 10013,7	//GD_EMERGENCYCALL
 
-// Habilidades de Assistentes
+// Mercenary Skills
 8214,7	//MA_CHARGEARROW
 8215,7	//MA_SHARPSHOOTING
 8217,7	//ML_BRANDISHSPEAR

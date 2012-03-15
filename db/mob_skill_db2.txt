@@ -1,92 +1,62 @@
-//--------------------------------------------------------------
-// _________                                    
-// \_   ___ \_______  ____   ____  __ __  ______
-// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
-// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
-//  \______  /|__|   \____/|___|  /____//____  >
-//         \/                   \/           \/  
-//--------------------------------------------------------------
-// Banco de Dados das Habilidades dos Monstros Adicionais
-//--------------------------------------------------------------
-// Estrutura do banco de dados:
-// MobID,Nome,Estado,SkillID,SkillLv,Chance,CastTime,Delay,Cancelavel,Alvo,TipoCondicao,ValorCondicao,Val1,Val2,Val3,Val4,Val5,Emotion,Chat
+// Custom mob skills
+//MOB_ID, a unused dummy character sequence (for information only), STATE, SKILL_ID, SKILL_LV,
+// rate (10000 = 100%), casttime, delay, cancelable, a target, a condition type, a condition value,
+// a value 1, a value 2, a value 3, a value 4, a value 5, emotion, chat
+//Example
+//1001,Poring@TF_POISON,attack,52,3,100,1500,10000,no,target,always,0,,,,,7
 //
-// 01. MobID			ID do monstro.
-// 02. Nome				Nome_do_monstro@Habilidade (apenas informativo).
-// 03. Estado
-//	any			= exceto morto
-//	idle		= em standby
-//	walk		= em movimento
-//	dead		= quando morto
-//	loot		= pega itens
-//	attack		= ataca de volta
-//	angry		= ataca sem que o jogador ataque antes
-//	chase		= segue o alvo após ser atacado
-//	follow		= segue o alvo mesmo que não seja atacado
-//	anytarget	= attack + angry + chase + follow
+//rate refers to the chance of the skill being casted when the condition is fulfilled.
+//delay is the time in milliseconds that has to be pass before recasting the same skill.
 //
-// 04. SkillID			ID da habilidade a ser usada.
-// 05. SkillLv			Nível da habilidade a ser usada.
-// 06. Chance			Chance da habilidade ser usada (100 = 1%).
-// 07. CastTime			Tempo de conjuração.
-// 08. Delay			Tempo entre conjurações em milisegundos.
-// 09. Cancelavel		A habilidade pode ser cancelada (yes / no).
-// 10. Alvo
-//	target			= alvo atual
-//	self			= ele mesmo
-//	friend			= amigo
-//	master			= líder
-//	randomtarget	= qualquer inimigo no raio da habilidade
-//	around1			= área 3x3 ao redor do monstro
-//	around2			= área 5x5 ao redor do monstro
-//	around3			= área 7x7 ao redor do monstro
-//	around4			= área 9x9 ao redor do monstro
-//	around5			= área 3x3 ao redor do alvo
-//	around6			= área 5x5 ao redor do alvo
-//	around7			= área 7x7 ao redor do alvo
-//	around8			= área 9x9 ao redor do alvo
-//	around			= around4
+//STATE:
+// any / idle (in standby) / walk (in movement) / dead (on killed) / loot /
+// attack / angry (like attack, except player has not attacked mob yet) /
+// chase (following target, after being attacked) / follow (following
+// target, without being attacked)
 //
-// 11. TipoCondicao
-//	always				unconditional
-//	onspawn				when the mob spawns/respawns.
+//target: The target of the skill can be: target (when a PC is targetted) / self / friend / master
+// (the following are for ground-skills, a random target tile is selected from
+// the specified area):
+// around1 (3x3 area around self) / around2 (5x5 area around self) /
+// around3 (7x7 area around self) / around4 (9x9 area around self) /
+// around5 (3x3 area around target) / around6 (5x5 area around target) /
+// around7 (7x7 area around target) / around8 (9x9 area around target) /
+// around (11x11 area around self)
+//
+//conditions: (condition type) (value which specifies a condition value)
+//	always			uncondtional
 //	myhpltmaxrate		when the mob's hp drops to a certain %
-//	myhpinrate			when the mob's hp is in a certain % range ('a condition value' is the lower cap, while 'a value 1' is the upper cap).
-//	mystatuson			If the mob has any abnormalities in status (condition value)
-//	mystatusoff			If the mob has ended any abnormalities in status (condition value)
-//	friendhpltmaxrate	when the mob's friend's hp drops to a certain %
-//	friendhpinrate		when the mob's friend's hp is in a certain % range (range defined the same way as in myhpinrate)
-//	friendstatuson		If the friend has any abnormalities in status (condition value)
-//	friendstatusoff		If the friend has ended any abnormalities in status (condition value)
-//	attackpcgt			Attack PC becomes more than the  number of specification
-//	attackpcge			Attack PC becomes equal or more than the number of specification.
-//	slavelt				when the number of slaves is lower than the original number of specification.
-//	slavele				when the number of slaves is lower or equal than the original number of specification.
+//	mystatuson		If the mob has any abnormalities in status (condition value),
+//	mystatusoff		If the mob has ended any abnormalities in status (condition value),
+//	friendhpltmaxrate	when the mobs' friend's hp drops to a certain %
+//	friendstatuson		If the friend has any abnormalities in status (condition value),
+//	friendstatusoff		If the friend has ended any abnormalities in status (condition value),
+//	attackpcgt		Attack PC becomes more than the  number of specification
+//	attackpcge		Attack PC becomes equal or more than the number of specification.
+//	slavelt			when the number of slaves is lower than the original number of specification.
+//	slavele			when the number of slaves is lower or equal than the original number of specification.
 //	closedattacked		when melee attacked (close range attack)
 //	longrangeattacked	when long ranged attacked (like bows and far range weapons)
-//	skillused			when a skill is used on the mob
-//	afterskill			after the mob used certain skill.
+//	skillused		when a skill is used on the mob
+//	afterskill		after the mob used certain skill.
 //	casttargeted		when a target is in cast range.
-//	rudeattacked		when a target is rude attacked.
+//	rudeattacked		when a target is rude attacked
 //
 // The character's state which can be specified to be a condition value by the statuson/statusoff system
-// anybad any type of state change
-// stone condition of being in stone state
-// freeze condition of being in frozen state
-// stun condition of being in stunned state
-// sleep condition of being in sleep state
-// poison condition of being in poisoned state
-// curse condition of being in cursed state
-// silence condition of being in silenced state
-// confusion condition of being in confusion state
-// blind condition of being in blind state
-// hiding condition of being in hidden state
-// sight condition of being in unhidden state
-//
-// 12. ValorCondicao	valor que satisfaça a condição.
-//--------------------------------------------------------------
+//	anybad		any type of state change
+//	stone		condition of being in stone state
+//	freeze		condition of being in frozen state
+//	stun		condition of being in stunned state
+//	sleep		condition of being in sleep state
+//	poison		condition of being in poisoned state
+//	curse		condition of being in cursed state
+//	silence		condition of being in silenced state
+//	confusion		condition of being in confusion state
+//	blind		condition of being in blind state
+//	hiding		condition of being in hidden state
+//	sight		condition of being in unhidden state
 
-// eAthena Dev Team
+// rAthena Dev Team
 //1900,Valaris@AL_TELEPORT,idle,26,1,10000,0,0,yes,self,rudeattacked,,,,,,,,
 //1900,Valaris@AL_TELEPORT,walk,26,1,500,0,5000,yes,self,rudeattacked,,,,,,,,
 //1900,Valaris@KN_BRANDISHSPEAR,attack,57,10,2000,500,5000,no,target,always,0,,,,,,29,

@@ -1,19 +1,24 @@
-//--------------------------------------------------------------
-// _________                                    
-// \_   ___ \_______  ____   ____  __ __  ______
-// /    \  \/\_  __ \/    \ /    \|  |  \/  ___/
-// \     \____|  | \(  ( ) )   |  \  |  /\___ \ 
-//  \______  /|__|   \____/|___|  /____//____  >
-//         \/                   \/           \/  
-//--------------------------------------------------------------
-// Banco de Dados de Tempo de Atraso (delay) em Itens
-//--------------------------------------------------------------
-// Estrutura: ItemID,Tempo_em_Milisegundos
-// NOTA: O máximo de entradas é definido em MAX_ITEMDELAYS
-//		 no arquivo itemdb.h
-//--------------------------------------------------------------
+// Item Delay Database
+// Max number of entries is defined in itemdb.h as MAX_ITEMDELAYS
+//
+// Structure:
+// Item ID,Delay in Milliseconds
 
-12208,60000		//Manual de Batalha
-12210,60000		//Goma de Mascar
-14538,300000	//Cálice da Ilusão
-14586,180000	//Doce Hiper Açucarado
+//12202,60000	//Str_Dish10_
+//12203,60000	//Agi_Dish10_
+//12204,60000	//Int_Dish10_
+//12205,60000	//Dex_Dish10_
+//12206,60000	//Luk_Dish10_
+//12207,60000	//Vit_Dish10_
+12208,60000	//Battle_Manual
+12210,60000	//Bubble_Gum
+14538,300000	//Glass_Of_Illusion
+14586,180000	//Spark_Candy
+607,5000	// Yggdrasil_Berry
+608,3000	// Yggdrasil_Seed
+
+// Bifrost Items
+11522,1000	// Red_Raffle_Sap
+11523,2000	// Yellow_Raffle_Sap
+11524,3000	// White_Raffle_Sap
+11525,5000	// Mora_Hip_Tea
