@@ -2715,12 +2715,12 @@
 //5542,Freyja_SCirclet60,Freyja SCirclet60,5,20,,700,,8,,0,0xFFFFFFFF,7,2,256,,20,0,18,{ bonus bStr,1; bonus bInt,1; bonus bDex,1; },{},{}
 //5543,Freyja_SCirclet90,Freyja SCirclet90,5,20,,700,,8,,0,0xFFFFFFFF,7,2,256,,20,0,18,{ bonus bStr,1; bonus bInt,1; bonus bDex,1; },{},{}
 5544,Time_Keeper_Hat,Time Keeper Hat,5,30000,,0,,6,,0,0xFFFFFFFF,7,2,256,,1,1,240,{ bonus bInt,2; bonus bMaxSP,50; },{},{}
-5545,Diadema_de_Áries,Diadema de Áries,5,20,,400,,3,,0,0xFFFFFFFF,7,2,256,,70,1,531,{ bonus bVit,2; bonus2 bSubEle,Ele_fire,5; if(getrefine()>6) { bonus bDef,1; bonus bVit,1; } },{},{}
-5546,Coroa_de_Áries,Coroa de Áries,5,20,,400,,3,,0,0xFFFFFFFF,7,2,256,,70,1,532,{ bonus bVit,2; bonus2 bSubEle,Ele_fire,5; if(getrefine()>6) { bonus bDef,1; bonus bVit,1; } },{},{}
+5545,Diadema_de_Áries,Diadema de Áries,5,20,,400,,3,,1,0xFFFFFFFF,7,2,256,,70,1,531,{ bonus bVit,2; bonus2 bSubEle,Ele_fire,5; if(getrefine()>6) { bonus bDef,1; bonus bVit,1; } },{},{}
+5546,Coroa_de_Áries,Coroa de Áries,5,20,,400,,3,,1,0xFFFFFFFF,7,2,256,,70,1,532,{ bonus bVit,2; bonus2 bSubEle,Ele_fire,5; if(getrefine()>6) { bonus bDef,1; bonus bVit,1; } },{},{}
 //5547,RJC_Katusa,RJC Katusa Flower,5,20,,200,,1,,1,0xFFFFFFFF,7,2,256,,0,1,533,{ bonus2 bSkillAtk,"WZ_HEAVENDRIVE",15+getequiprefinerycnt(EQI_HAND_R); bonus2 bSkillAtk,"WZ_HEAVENDRIVE",15+getequiprefinerycnt(EQI_HAND_R); bonus bCastRate,-25; },{},{}
 //5548,Scarlet_Rose,Scarlet Rose,5,20,,100,,0,,0,0xFFFFFFFF,7,2,256,,50,1,534,{ bonus bLuk,1; },{},{}
-5549,Diadema_de_Touro,Diadema de Touro,5,20,,300,,3,,0,0xFFFFFFFF,7,2,256,,70,1,535,{ bonus bDex,2; bonus bDelayRate,-2; bonus2 bSubEle,Ele_earth,5; if(getrefine()>6) { bonus bDex,1; bonus bMatkRate,1; } },{},{}
-5550,Coroa_de_Touro,Coroa de Touro,5,20,,300,,3,,0,0xFFFFFFFF,7,2,256,,70,1,536,{ bonus bDex,2; bonus bDelayRate,-2; bonus2 bSubEle,Ele_earth,5; if(getrefine()>6) { bonus bDex,1; bonus bMatkRate,1; } },{},{}
+5549,Diadema_de_Touro,Diadema de Touro,5,20,,300,,3,,1,0xFFFFFFFF,7,2,256,,70,1,535,{ bonus bDex,2; bonus bDelayRate,-2; bonus2 bSubEle,Ele_earth,5; if(getrefine()>6) { bonus bDex,1; bonus bMatkRate,1; } },{},{}
+5550,Coroa_de_Touro,Coroa de Touro,5,20,,300,,3,,1,0xFFFFFFFF,7,2,256,,70,1,536,{ bonus bDex,2; bonus bDelayRate,-2; bonus2 bSubEle,Ele_earth,5; if(getrefine()>6) { bonus bDex,1; bonus bMatkRate,1; } },{},{}
 //5551,Holy_Egg_Hat,Holy Egg Hat,5,20,,0,,1,,0,0xFFFFFFFF,7,2,256,,0,1,537,{},{},{}
 5552,Fest_Lord_Circlet,Festival Grand Circlet,5,0,,0,,8,,0,0xFFFFFFFF,7,2,256,,0,0,93,{ bonus bStr,3; bonus bInt,3; bonus bMdef,3; },{},{}
 5553,Fest_Bunny_Band,Festival Bunny Band,5,0,,0,,7,,0,0xFFFFFFFF,7,2,256,,0,0,15,{ bonus bMdef,4; bonus2 bSubRace,RC_DemiHuman,9; },{},{}
@@ -2739,8 +2739,8 @@
 //5566,Tiger_Arhat_Mask,Tiger Arhat Mask,5,0,,0,,1,,0,0xFFFFFFFF,7,2,513,,0,0,546,{ bonus bStr,1; bonus2 bAddRace,RC_DemiHuman,2; },{},{}
 5567,Fúria_Brilhante,Fúria Brilhante,5,20,,300,,1,,1,0xFFFFFFFF,7,2,256,,1,1,548,{ bonus bStr,1; bonus2 bAddRace,RC_NonBoss,2; bonus2 bAddRace,RC_Boss,2; bonus bAspdRate,2; },{},{}
 5568,Boina_de_Coelho,Boina de Coelho,5,20,,1000,,1,,1,0xFFFFFFFF,7,2,768,,0,1,549,{ bonus bInt,2; },{},{}
-5569,Diadema_de_Gêmeos,Diadema de Gêmeos,5,20,,300,,4,,0,0xFFFFFFFF,7,2,256,,70,1,550,{ bonus bAgi,2; bonus bMatkRate,2; if(getrefine()>6) { bonus bMdef,7; bonus bMAtkRate,8; bonus2 bSubEle,Ele_Wind,5; } },{},{}
-5570,Coroa_de_Gêmeos,Coroa de Gêmeos,5,20,,300,,4,,0,0xFFFFFFFF,7,2,256,,70,1,551,{ bonus bAgi,2; bonus bAtk,2; bonus bMdef,5; if(getrefine()>6) { bonus bDef,1; bonus bMAtk,15; bonus bFlee,10; bonus2 bSubEle,Ele_Wind,5; } },{},{}
+5569,Diadema_de_Gêmeos,Diadema de Gêmeos,5,20,,300,,4,,1,0xFFFFFFFF,7,2,256,,70,1,550,{ bonus bAgi,2; bonus bMatkRate,2; if(getrefine()>6) { bonus bMdef,7; bonus bMAtkRate,8; bonus2 bSubEle,Ele_Wind,5; } },{},{}
+5570,Coroa_de_Gêmeos,Coroa de Gêmeos,5,20,,300,,4,,1,0xFFFFFFFF,7,2,256,,70,1,551,{ bonus bAgi,2; bonus bAtk,2; bonus bMdef,5; if(getrefine()>6) { bonus bDef,1; bonus bMAtk,15; bonus bFlee,10; bonus2 bSubEle,Ele_Wind,5; } },{},{}
 //5571,Rasta_Wig,Rasta_Wig,5,20,,100,,1,,0,0xFFFFFFFF,7,2,256,,0,1,552,{ bonus bStr,1; },{},{}
 5572,Chapéu_de_Bebê_Selvagem,Chapéu de Bebê Selvagem,5,20,,100,,1,,1,0xFFFFFFFF,7,2,256,,1,1,553,{ bonus bVit,2; },{},{}
 5573,Bogy_Horn,Dokebi Horn,5,20,,100,,1,,1,0xFFFFFFFF,7,2,256,,0,1,554,{},{},{}
