@@ -11118,6 +11118,7 @@ void clif_storagepassword(struct map_session_data* sd, short info)
 /// NOTE: This packet is only available on certain non-kRO clients.
 void clif_parse_StoragePassword(int fd, struct map_session_data *sd)
 {
+#ifdef STORAGE_PASSWORD
 	unsigned short type = RFIFOW(fd, 2);
 	char password[9];
 	char newpassword[9];
@@ -11211,6 +11212,7 @@ void clif_parse_StoragePassword(int fd, struct map_session_data *sd)
 		sd->state.storage_open_progress = 1;
 		sd->storage_error_count = 0;
 	}
+#endif
 }
 
 

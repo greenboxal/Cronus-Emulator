@@ -1,3 +1,7 @@
+#ifndef addpacket
+#define addpacket(a,b,c,...)
+#endif
+
 addpacket(0x0064,55,NULL);
 addpacket(0x0065,17,NULL);
 addpacket(0x0066,6,NULL);
@@ -1635,18 +1639,18 @@ addpacket(0x083D,6,NULL);
 #endif
 
 #if PACKETVER >= 20100615
-//addpacket(0x083E,26,NULL);
+addpacket(0x083E,26,NULL);
 #endif
 
 #if PACKETVER >= 20100622
-//addpacket(0x083F,22,NULL);
+addpacket(0x083F,22,NULL);
 #endif
 
 #if PACKETVER >= 20100629
 addpacket(0x00AA,9,NULL);
-//addpacket(0x07F1,18,NULL);
-//addpacket(0x07F2,8,NULL);
-//addpacket(0x07F3,6,NULL);
+addpacket(0x07F1,18,NULL);
+addpacket(0x07F2,8,NULL);
+addpacket(0x07F3,6,NULL);
 #endif
 
 #if PACKETVER >= 20100701
@@ -1654,18 +1658,18 @@ addpacket(0x083A,5,NULL); // Search Stalls Feature
 #endif
 
 #if PACKETVER >= 20100713
-//addpacket(0x0827,6,NULL);
-//addpacket(0x0828,14,NULL);
-//addpacket(0x0829,6,NULL);
-//addpacket(0x082A,10,NULL);
-//addpacket(0x082B,6,NULL);
-//addpacket(0x082C,14,NULL);
-//addpacket(0x0840,-1,NULL);
-//addpacket(0x0841,19,NULL);
+addpacket(0x0827,6,NULL);
+addpacket(0x0828,14,NULL);
+addpacket(0x0829,6,NULL);
+addpacket(0x082A,10,NULL);
+addpacket(0x082B,6,NULL);
+addpacket(0x082C,14,NULL);
+addpacket(0x0840,-1,NULL);
+addpacket(0x0841,19,NULL);
 #endif
 
 #if PACKETVER >= 20100714
-//addpacket(0x841,4,NULL);
+addpacket(0x841,4,NULL);
 #endif
 
 #if PACKETVER >= 20100803
@@ -1727,17 +1731,17 @@ addpacket(0x08D4,-1,NULL);
 
 
 #if PACKETVER >= 20111102
-//0x083c,19,wanttoconnection,2,6,10,14,18
-//0x088a,6,getcharnamerequest,2
-//0x0817,6,ticksend,2
-//0x0366,5,changedir,2,4
-//0x0364,5,walktoxy,2
-//0x08aa,7,actionrequest,2,6
-//0x02c4,10,useskilltoid,2,4,6
-//0x0369,10,useskilltopos,2,4,6,8
-//0x08ad,90,useskilltoposinfo,2,4,6,8,10
-//0x0885,6,dropitem,2,4
-//0x0815,6,takeitem,2
+addpacket(0x083c,19,"wanttoconnection",2,6,10,14,18);
+addpacket(0x088a,6,"getcharnamerequest",2);
+addpacket(0x0817,6,"ticksend",2);
+addpacket(0x0366,5,"changedir",2,4);
+addpacket(0x0364,5,"walktoxy",2);
+addpacket(0x08aa,7,"actionrequest",2,6);
+addpacket(0x02c4,10,"useskilltoid",2,4,6);
+addpacket(0x0369,10,"useskilltopos",2,4,6,8);
+addpacket(0x08ad,90,"useskilltoposinfo",2,4,6,8,10);
+addpacket(0x0885,6,"dropitem",2,4);
+addpacket(0x0815,6,"takeitem",2);
 #endif
 
 #if PACKETVER >= 20111122
