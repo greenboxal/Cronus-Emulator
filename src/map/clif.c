@@ -11119,30 +11119,34 @@ void clif_storagepassword(struct map_session_data* sd, short info)
 void clif_parse_StoragePassword(int fd, struct map_session_data *sd)
 {
 	unsigned short type = RFIFOW(fd, 2);
-	char *password = (char *)RFIFOP(fd, 4);
-	char *newpassword = (char *)RFIFOP(fd, 20);
+	char password[9];
+	char newpassword[9];
 
 	char str[32] = { 0 };
-	u4byte tmp[4] = { 0 };
+	char tmp[32] = { 0 };
 
 	memset(str, 0, sizeof(str));
 	memset(tmp, 0, sizeof(tmp));
 
 #ifdef STORAGE_PASSWORD_KEY
-	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 4), (u4byte *)&tmp);
+	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 4), (u4byte *)tmp);
+#else
+	memcpy(tmp, RBUFP(fd, 4), 16);
 #endif
 
-	sprintf(str, "%d", tmp[0]);
-	memcpy(RBUFP(fd, 4), &str[1], 8);
-	RBUFB(fd, 12) = 0;
+	sprintf(str, "%d", *((unsigned int *)&tmp[0]));
+	memcpy(password, &str[1], 8);
+	password[8] = 0;
 	
 #ifdef STORAGE_PASSWORD_KEY
-	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 20), (u4byte *)&tmp);
+	crypton_decrypt(&sd->crypton, (const u4byte *)RBUFP(fd, 20), (u4byte *)tmp);
+#else
+	memcpy(tmp, RBUFP(fd, 20), 16);
 #endif
 			
-	sprintf(str, "%d", tmp[0]);
-	memcpy(RBUFP(fd, 20), &str[1], 8);
-	RBUFB(fd, 28) = 0;
+	sprintf(str, "%d", *((unsigned int *)&tmp[0]));
+	memcpy(newpassword, &str[1], 8);
+	newpassword[8] = 0;
 
 	if (type == 3 && sd->state.storage_open_progress == 1)
 	{

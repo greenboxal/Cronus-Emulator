@@ -45,7 +45,7 @@
 // 20111025 - 2011-10-25aRagexeRE+ - 0x6b, 0x6d
 
 // Descomente isso caso for usar clients do bRO
-#define BRO_CLIENT
+//#define BRO_CLIENT
 
 #ifndef PACKETVER
 	#define PACKETVER 20111102
